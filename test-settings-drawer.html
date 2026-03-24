@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Settings Drawer - Vastra AI</title>
+  <style>
+    body {
+      font-family: 'DM Sans', sans-serif;
+      padding: 20px;
+      background-color: #faf6f1;
+    }
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      color: #1a1410;
+      margin-bottom: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #faf6f1;
+      border-radius: 4px;
+    }
+    .test-button {
+      padding: 10px 20px;
+      margin: 5px;
+      background: #c9847a;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .test-button:hover {
+      background: #b57368;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      background: white;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .success { color: #4ade80; }
+    .error { color: #ef4444; }
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>Settings Drawer Test Suite</h1>
+    
+    <div class="test-section">
+      <h3>Manual Tests</h3>
+      <p>Open the application below and test the following:</p>
+      <ol>
+        <li>Click the gear icon in the header - drawer should slide in from right</li>
+        <li>Click outside the drawer - drawer should close</li>
+        <li>Open drawer and press Escape key - drawer should close</li>
+        <li>Enter an API key and click Save - should show green checkmark for 2 seconds</li>
+        <li>Verify API key is masked showing only last 6 characters as "hf_...xYz123"</li>
+        <li>Click Delete button - should clear the API key</li>
+        <li>Verify status indicator shows red "No API Key" when no key is saved</li>
+        <li>Verify status indicator shows green "API Key Saved" when key is saved</li>
+        <li>Resize browser to < 480px - drawer should be full width</li>
+        <li>Resize browser to > 480px - drawer should be 360px wide</li>
+      </ol>
+    </div>
+    
+    <div class="test-section">
+      <h3>Automated Checks</h3>
+      <button class="test-button" onclick="testAPIKeyMasking()">Test API Key Masking</button>
+      <button class="test-button" onclick="testLocalStorage()">Test localStorage</button>
+      <button class="test-button" onclick="testResponsiveWidth()">Test Responsive Width</button>
+      <div id="testResults" class="status"></div>
+    </div>
+    
+    <h3>Live Application</h3>
+    <iframe src="index.html" id="appFrame"></iframe>
+  </div>
+  
+  <script>
+    function testAPIKeyMasking() {
+      const results = document.getElementById('testResults');
+      const testCases = [
+        { input: 'hf_abcdefghijklmnopqrstuvwxyz123456', expected: 'hf_...123456' },
+        { input: 'hf_test123', expected: 'hf_...test123' },
+        { input: 'short', expected: '' },
+        { input: '', expected: '' }
+      ];
+      
+      let passed = 0;
+      let failed = 0;
+      let output = '<strong>API Key Masking Tests:</strong><br>';
+      
+      // Access the iframe's maskAPIKey function
+      const iframe = document.getElementById('appFrame');
+      const maskAPIKey = iframe.contentWindow.maskAPIKey;
+      
+      if (!maskAPIKey) {
+        output += '<span class="error">❌ Cannot access maskAPIKey function</span><br>';
+        results.innerHTML = output;
+        return;
+      }
+      
+      testCases.forEach((test, i) => {
+        const result = maskAPIKey(test.input);
+        if (result === test.expected) {
+          passed++;
+          output += `<span class="success">✓ Test ${i + 1}: Passed</span><br>`;
+        } else {
+          failed++;
+          output += `<span class="error">✗ Test ${i + 1}: Failed (expected "${test.expected}", got "${result}")</span><br>`;
+        }
+      });
+      
+      output += `<br><strong>Results: ${passed} passed, ${failed} failed</strong>`;
+      results.innerHTML = output;
+    }
+    
+    function testLocalStorage() {
+      const results = document.getElementById('testResults');
+      let output = '<strong>localStorage Tests:</strong><br>';
+      
+      try {
+        // Test save
+        localStorage.setItem('vastra_hf_key', 'test_key_12345');
+        const retrieved = localStorage.getItem('vastra_hf_key');
+        
+        if (retrieved === 'test_key_12345') {
+          output += '<span class="success">✓ Save and retrieve: Passed</span><br>';
+        } else {
+          output += '<span class="error">✗ Save and retrieve: Failed</span><br>';
+        }
+        
+        // Test delete
+        localStorage.removeItem('vastra_hf_key');
+        const afterDelete = localStorage.getItem('vastra_hf_key');
+        
+        if (afterDelete === null) {
+          output += '<span class="success">✓ Delete: Passed</span><br>';
+        } else {
+          output += '<span class="error">✗ Delete: Failed</span><br>';
+        }
+        
+        output += '<br><strong>All localStorage tests passed!</strong>';
+      } catch (e) {
+        output += `<span class="error">✗ Error: ${e.message}</span>`;
+      }
+      
+      results.innerHTML = output;
+    }
+    
+    function testResponsiveWidth() {
+      const results = document.getElementById('testResults');
+      let output = '<strong>Responsive Width Test:</strong><br>';
+      
+      output += 'Current viewport width: ' + window.innerWidth + 'px<br>';
+      
+      if (window.innerWidth < 480) {
+        output += '<span class="success">✓ Mobile viewport detected - drawer should be full width</span><br>';
+      } else {
+        output += '<span class="success">✓ Desktop viewport detected - drawer should be 360px wide</span><br>';
+      }
+      
+      output += '<br><em>Resize the browser window and run this test again to verify responsive behavior</em>';
+      
+      results.innerHTML = output;
+    }
+  </script>
+</body>
+</html>

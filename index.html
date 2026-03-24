@@ -1,0 +1,2774 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vastra AI - Indian Fashion Design Generator</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* CSS Custom Properties - Design Tokens */
+    :root {
+      /* Colors */
+      --color-deep-ink: #1a1410;
+      --color-warm-cream: #faf6f1;
+      --color-rose-accent: #c9847a;
+      --color-gold: #c4a96b;
+
+      /* Fonts */
+      --font-heading: 'Cormorant Garamond', serif;
+      --font-body: 'DM Sans', sans-serif;
+
+      /* Spacing */
+      --drawer-width: 360px;
+      --drawer-width-mobile: 100%;
+      --mobile-breakpoint: 480px;
+
+      /* Animation */
+      --transition-drawer: transform 0.3s ease-out;
+      --transition-standard: all 0.2s ease;
+    }
+
+    /* Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--color-warm-cream);
+      color: var(--color-deep-ink);
+      overflow-x: hidden;
+    }
+
+    /* Layout Containers */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background-color: var(--color-warm-cream);
+      border-bottom: 1px solid rgba(26, 20, 16, 0.1);
+      position: relative;
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .brand-name {
+      font-family: var(--font-heading);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-deep-ink);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* Status Indicator */
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      padding: 0.5rem 0.75rem;
+      border-radius: 1rem;
+      transition: var(--transition-standard);
+      position: relative;
+    }
+
+    .status-indicator:hover {
+      background-color: rgba(26, 20, 16, 0.05);
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-dot.green {
+      background-color: #4ade80;
+    }
+
+    .status-dot.red {
+      background-color: #ef4444;
+      animation: pulse-red 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-red {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+      }
+    }
+
+    .status-text {
+      font-size: 0.875rem;
+      color: var(--color-deep-ink);
+      display: none;
+    }
+
+    @media (min-width: 640px) {
+      .status-text {
+        display: block;
+      }
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      bottom: -2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--color-deep-ink);
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 100;
+    }
+
+    .tooltip::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-bottom: 4px solid var(--color-deep-ink);
+    }
+
+    .status-indicator:hover .tooltip {
+      opacity: 1;
+    }
+
+    /* Settings Button */
+    .settings-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-standard);
+      color: var(--color-deep-ink);
+    }
+
+    .settings-button:hover {
+      background-color: rgba(26, 20, 16, 0.1);
+      transform: rotate(45deg);
+    }
+
+    .settings-button:active {
+      transform: rotate(45deg) scale(0.95);
+    }
+
+    /* Chat Container */
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Input Bar */
+    .input-bar {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--color-warm-cream);
+      border-top: 1px solid rgba(26, 20, 16, 0.1);
+      padding: 1rem 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+      z-index: 5;
+    }
+
+    .input-textarea {
+      flex: 1;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(26, 20, 16, 0.2);
+      border-radius: 1.5rem;
+      background-color: white;
+      color: var(--color-deep-ink);
+      resize: none;
+      min-height: 48px;
+      max-height: calc(48px * 3);
+      overflow-y: auto;
+      transition: var(--transition-standard);
+    }
+
+    .input-textarea:focus {
+      outline: none;
+      border-color: var(--color-rose-accent);
+    }
+
+    .send-button {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: var(--color-rose-accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-standard);
+      flex-shrink: 0;
+    }
+
+    .send-button:hover {
+      background-color: #b57368;
+      transform: scale(1.05);
+    }
+
+    .send-button:active {
+      transform: scale(0.95);
+    }
+
+    /* Settings Drawer */
+    .settings-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(26, 20, 16, 0.5);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .settings-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .settings-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: var(--drawer-width);
+      background-color: white;
+      box-shadow: -4px 0 24px rgba(26, 20, 16, 0.15);
+      z-index: 101;
+      transform: translateX(100%);
+      transition: var(--transition-drawer);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .settings-drawer.open {
+      transform: translateX(0);
+    }
+
+    .settings-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(26, 20, 16, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .settings-title {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-deep-ink);
+    }
+
+    .close-button {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-standard);
+      color: var(--color-deep-ink);
+    }
+
+    .close-button:hover {
+      background-color: rgba(26, 20, 16, 0.1);
+    }
+
+    .settings-content {
+      flex: 1;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .settings-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-deep-ink);
+    }
+
+    .section-description {
+      font-size: 0.875rem;
+      color: rgba(26, 20, 16, 0.7);
+      line-height: 1.5;
+    }
+
+    /* API Key Input Section */
+    .api-key-input-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .api-key-input {
+      width: 100%;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(26, 20, 16, 0.2);
+      border-radius: 0.5rem;
+      background-color: var(--color-warm-cream);
+      color: var(--color-deep-ink);
+      transition: var(--transition-standard);
+    }
+
+    .api-key-input:focus {
+      outline: none;
+      border-color: var(--color-rose-accent);
+    }
+
+    .api-key-input::placeholder {
+      color: rgba(26, 20, 16, 0.4);
+    }
+
+    .helper-text {
+      font-size: 0.75rem;
+      color: rgba(26, 20, 16, 0.6);
+      line-height: 1.4;
+    }
+
+    .helper-text a {
+      color: var(--color-rose-accent);
+      text-decoration: none;
+      transition: var(--transition-standard);
+    }
+
+    .helper-text a:hover {
+      text-decoration: underline;
+    }
+
+    /* Button Group */
+    .button-group {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-standard);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background-color: var(--color-rose-accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #b57368;
+    }
+
+    .btn-secondary {
+      background-color: rgba(26, 20, 16, 0.1);
+      color: var(--color-deep-ink);
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(26, 20, 16, 0.15);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Confirmation Checkmark */
+    .checkmark-animation {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: #4ade80;
+      animation: checkmark-pop 0.3s ease;
+    }
+
+    @keyframes checkmark-pop {
+      0% {
+        transform: scale(0);
+      }
+
+      50% {
+        transform: scale(1.2);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    /* Status Indicator in Settings */
+    .status-indicator-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      background-color: var(--color-warm-cream);
+      border-radius: 0.5rem;
+    }
+
+    .status-indicator-section .status-dot {
+      width: 12px;
+      height: 12px;
+    }
+
+    .status-indicator-section .status-text {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    /* Model Info Section */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .info-label {
+      font-size: 0.75rem;
+      color: rgba(26, 20, 16, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .info-value {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-deep-ink);
+    }
+
+    /* Instructions Section */
+    .instructions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .instruction-item {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: rgba(26, 20, 16, 0.8);
+    }
+
+    .instruction-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: var(--color-rose-accent);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .instruction-text {
+      flex: 1;
+      padding-top: 2px;
+    }
+
+    .instruction-text a {
+      color: var(--color-rose-accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .instruction-text a:hover {
+      text-decoration: underline;
+    }
+
+    /* Welcome Screen */
+    .welcome-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .welcome-title {
+      font-family: var(--font-heading);
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--color-deep-ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .welcome-subtitle {
+      font-size: 1.125rem;
+      color: rgba(26, 20, 16, 0.7);
+      margin-bottom: 2rem;
+      max-width: 600px;
+    }
+
+    /* Suggestion Chips */
+    .suggestions-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      max-width: 700px;
+      margin-top: 1rem;
+    }
+
+    .suggestion-chip {
+      padding: 0.75rem 1.25rem;
+      background-color: white;
+      border: 1px solid rgba(26, 20, 16, 0.15);
+      border-radius: 2rem;
+      font-size: 0.875rem;
+      color: var(--color-deep-ink);
+      cursor: pointer;
+      transition: var(--transition-standard);
+      white-space: nowrap;
+    }
+
+    .suggestion-chip:hover {
+      background-color: var(--color-rose-accent);
+      color: white;
+      border-color: var(--color-rose-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(201, 132, 122, 0.3);
+    }
+
+    .suggestion-chip:active {
+      transform: translateY(0);
+    }
+
+    /* Message List */
+    .message-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding-bottom: 1rem;
+    }
+
+    .message {
+      display: flex;
+      gap: 0.75rem;
+      animation: message-slide-in 0.3s ease;
+    }
+
+    @keyframes message-slide-in {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.user {
+      flex-direction: row-reverse;
+    }
+
+    .message-bubble {
+      max-width: 70%;
+      padding: 1rem 1.25rem;
+      border-radius: 1.25rem;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+
+    .message.user .message-bubble {
+      background-color: var(--color-deep-ink);
+      color: white;
+      border-bottom-right-radius: 0.25rem;
+      margin-left: auto;
+    }
+
+    .message.ai .message-bubble {
+      background-color: white;
+      color: var(--color-deep-ink);
+      border: 1px solid rgba(26, 20, 16, 0.1);
+      border-bottom-left-radius: 0.25rem;
+    }
+
+    .message.system .message-bubble {
+      background-color: rgba(201, 132, 122, 0.1);
+      color: var(--color-deep-ink);
+      border: 1px solid rgba(201, 132, 122, 0.2);
+      max-width: 100%;
+      text-align: center;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 480px) {
+      .header {
+        padding: 0.75rem 1rem;
+      }
+
+      .brand-name {
+        font-size: 1.5rem;
+      }
+
+      .chat-container {
+        padding: 1rem;
+      }
+
+      .input-bar {
+        padding: 0.75rem 1rem;
+      }
+
+      .settings-drawer {
+        width: var(--drawer-width-mobile);
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .welcome-title {
+        font-size: 2rem;
+      }
+
+      .welcome-subtitle {
+        font-size: 1rem;
+      }
+
+      .message-bubble {
+        max-width: 85%;
+      }
+
+      .suggestion-chip {
+        font-size: 0.8125rem;
+        padding: 0.625rem 1rem;
+      }
+    }
+
+    /* Design Card Styles */
+    .design-card {
+      margin-top: 1rem;
+      background-color: white;
+      border: 1px solid rgba(26, 20, 16, 0.1);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      max-width: 600px;
+    }
+
+    .design-card-header {
+      margin-bottom: 1rem;
+    }
+
+    .outfit-title {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--color-deep-ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .design-labels {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .design-label {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background-color: rgba(201, 132, 122, 0.1);
+      color: var(--color-rose-accent);
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: capitalize;
+    }
+
+    /* Progress Section */
+    .progress-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background-color: rgba(26, 20, 16, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-rose-accent), var(--color-gold));
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-label {
+      font-size: 0.875rem;
+      color: rgba(26, 20, 16, 0.7);
+      text-align: center;
+    }
+
+    /* Mannequin Section */
+    .mannequin-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .image-container {
+      position: relative;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      background-color: var(--color-warm-cream);
+    }
+
+    .mannequin-image {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .image-hint {
+      font-size: 0.75rem;
+      color: rgba(26, 20, 16, 0.5);
+      text-align: center;
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+
+    /* Image Overlay */
+    .image-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(26, 20, 16, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .image-container:hover .image-overlay {
+      opacity: 1;
+    }
+
+    .overlay-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background-color: white;
+      color: var(--color-deep-ink);
+      border: none;
+      border-radius: 0.5rem;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-standard);
+    }
+
+    .overlay-button:hover {
+      background-color: var(--color-rose-accent);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .overlay-button:active {
+      transform: translateY(0);
+    }
+
+    /* Detail Shots Section */
+    .detail-shots-section {
+      margin-top: 1.5rem;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .detail-image-container {
+      aspect-ratio: 1;
+    }
+
+    .detail-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .detail-label {
+      font-size: 0.75rem;
+      color: rgba(26, 20, 16, 0.7);
+      text-align: center;
+      text-transform: capitalize;
+    }
+
+    /* Skeleton Loader */
+    .skeleton-loader {
+      background: linear-gradient(90deg,
+          rgba(250, 246, 241, 0.8) 0%,
+          rgba(250, 246, 241, 1) 50%,
+          rgba(250, 246, 241, 0.8) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite linear;
+      border-radius: 0.75rem;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    .mannequin-skeleton {
+      width: 100%;
+      aspect-ratio: 768 / 1024;
+    }
+
+    .detail-skeleton {
+      width: 100%;
+      aspect-ratio: 1;
+    }
+
+    /* Responsive Design for Design Card */
+    @media (max-width: 640px) {
+      .detail-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .overlay-button {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+        gap: 0.25rem;
+      }
+
+      .overlay-button svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
+
+    /* Lightbox Styles */
+    .lightbox-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(26, 20, 16, 0.9);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      animation: fade-in 0.2s ease;
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .lightbox-content {
+      display: flex;
+      flex-direction: column;
+      max-width: 90vw;
+      max-height: 90vh;
+      background-color: white;
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+
+    .lightbox-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(26, 20, 16, 0.1);
+    }
+
+    .lightbox-label {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-deep-ink);
+      text-transform: capitalize;
+    }
+
+    .lightbox-close-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-standard);
+      color: var(--color-deep-ink);
+    }
+
+    .lightbox-close-button:hover {
+      background-color: rgba(26, 20, 16, 0.1);
+    }
+
+    .lightbox-image-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      overflow: auto;
+      background-color: var(--color-warm-cream);
+    }
+
+    .lightbox-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 0.5rem;
+    }
+
+    .lightbox-footer {
+      display: flex;
+      justify-content: center;
+      padding: 1.5rem;
+      border-top: 1px solid rgba(26, 20, 16, 0.1);
+    }
+
+    @media (max-width: 640px) {
+      .lightbox-overlay {
+        padding: 1rem;
+      }
+
+      .lightbox-header {
+        padding: 1rem;
+      }
+
+      .lightbox-label {
+        font-size: 1rem;
+      }
+
+      .lightbox-image-container {
+        padding: 1rem;
+      }
+
+      .lightbox-footer {
+        padding: 1rem;
+      }
+    }
+
+    /* Typing Indicator */
+    .typing-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+    }
+
+    .typing-indicator span {
+      width: 6px;
+      height: 6px;
+      background-color: rgba(26, 20, 16, 0.5);
+      border-radius: 50%;
+      animation: typing-bounce 1.4s infinite ease-in-out both;
+    }
+
+    .typing-indicator span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .typing-indicator span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes typing-bounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+      }
+
+      40% {
+        transform: scale(1.0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1 class="brand-name">Vastra AI</h1>
+      </div>
+      <div class="header-right">
+        <!-- Status indicator and settings icon will be added in later tasks -->
+      </div>
+    </header>
+
+    <!-- Chat Container -->
+    <main class="chat-container" id="chatContainer">
+      <!-- Chat messages will be dynamically inserted here -->
+    </main>
+
+    <!-- Input Bar -->
+    <div class="input-bar">
+      <textarea class="input-textarea" id="messageInput" placeholder="Describe your outfit design..."
+        rows="1"></textarea>
+      <button class="send-button" id="sendButton" aria-label="Send message">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================================
+    // STATE MANAGEMENT
+    // ============================================================================
+
+    /**
+     * StateManager - Manages application state with subscriber pattern
+     * Implements Requirements 11.1, 11.2
+     */
+    class StateManager {
+      constructor() {
+        this.state = {
+          apiKey: null,
+          messages: [],
+          currentGeneration: null,
+          settingsOpen: false,
+          lightboxImage: null
+        };
+        this.listeners = [];
+      }
+
+      /**
+       * Get current application state
+       * @returns {Object} Current state object
+       */
+      getState() {
+        return { ...this.state };
+      }
+
+      /**
+       * Update application state and notify subscribers
+       * @param {Object} updates - Partial state updates to apply
+       */
+      setState(updates) {
+        this.state = { ...this.state, ...updates };
+        this.notifyListeners();
+      }
+
+      /**
+       * Subscribe to state changes
+       * @param {Function} listener - Callback function to be called on state changes
+       * @returns {Function} Unsubscribe function
+       */
+      subscribe(listener) {
+        this.listeners.push(listener);
+        // Return unsubscribe function
+        return () => {
+          this.listeners = this.listeners.filter(l => l !== listener);
+        };
+      }
+
+      /**
+       * Notify all subscribers of state change
+       * @private
+       */
+      notifyListeners() {
+        const currentState = this.getState();
+        this.listeners.forEach(listener => listener(currentState));
+      }
+
+      // ========================================================================
+      // SPECIFIC STATE OPERATIONS
+      // ========================================================================
+
+      /**
+       * Add a message to the chat history
+       * @param {Object} message - Message object with id, type, content, timestamp
+       */
+      addMessage(message) {
+        const messages = [...this.state.messages, message];
+        this.setState({ messages });
+      }
+
+      /**
+       * Update the current generation state
+       * @param {Object} updates - Partial generation updates
+       */
+      updateGeneration(updates) {
+        if (!this.state.currentGeneration) {
+          this.setState({ currentGeneration: updates });
+        } else {
+          const currentGeneration = { ...this.state.currentGeneration, ...updates };
+          this.setState({ currentGeneration });
+        }
+      }
+
+      /**
+       * Clear the current generation state
+       */
+      clearGeneration() {
+        this.setState({ currentGeneration: null });
+      }
+
+      /**
+       * Set the API key in state
+       * @param {string} key - Hugging Face API key
+       */
+      setAPIKey(key) {
+        this.setState({ apiKey: key });
+      }
+
+      /**
+       * Clear the API key from state
+       */
+      clearAPIKey() {
+        this.setState({ apiKey: null });
+      }
+
+      /**
+       * Open the settings drawer
+       */
+      openSettings() {
+        this.setState({ settingsOpen: true });
+      }
+
+      /**
+       * Close the settings drawer
+       */
+      closeSettings() {
+        this.setState({ settingsOpen: false });
+      }
+
+      /**
+       * Open the lightbox with image data
+       * @param {Object} data - Lightbox data with imageUrl, label, filename
+       */
+      openLightbox(data) {
+        this.setState({ lightboxImage: data });
+      }
+
+      /**
+       * Close the lightbox
+       */
+      closeLightbox() {
+        this.setState({ lightboxImage: null });
+      }
+    }
+
+    // ============================================================================
+    // STORAGE MANAGEMENT
+    // ============================================================================
+
+    /**
+     * StorageManager - Manages localStorage operations for API key persistence
+     * Implements Requirements 4.3, 11.6, 10
+     */
+    class StorageManager {
+      /**
+       * Save API key to localStorage
+       * @param {string} key - Hugging Face API key to store
+       */
+      static saveAPIKey(key) {
+        if (!key || typeof key !== 'string') {
+          throw new Error('Invalid API key: must be a non-empty string');
+        }
+        localStorage.setItem('vastra_hf_key', key);
+      }
+
+      /**
+       * Retrieve API key from localStorage
+       * @returns {string|null} The stored API key or null if not found
+       */
+      static getAPIKey() {
+        return localStorage.getItem('vastra_hf_key');
+      }
+
+      /**
+       * Delete API key from localStorage
+       */
+      static deleteAPIKey() {
+        localStorage.removeItem('vastra_hf_key');
+      }
+    }
+
+    // ============================================================================
+    // PROMPT BUILDER
+    // ============================================================================
+
+    /**
+     * PromptBuilder - Constructs prompts for image generation
+     * Implements Requirements 2.1, 2.2, 2.3, 2.4, 2.5
+     */
+    class PromptBuilder {
+      /**
+       * Build prompt for mannequin view generation
+       * Uses exact template from Requirement 2.2 with user text appended without modification
+       * @param {string} userText - User's exact outfit description
+       * @returns {string} Complete prompt for mannequin view
+       */
+      static buildMannequinPrompt(userText) {
+        return `Professional Indian fashion photography, full length female mannequin, white studio background, soft studio lighting, fashion editorial style, full body front facing, 4K, ${userText}`;
+      }
+
+      /**
+       * Build prompt for detail shot generation
+       * Uses exact template from Requirement 2.3 with part and user text
+       * @param {string} userText - User's exact outfit description
+       * @param {string} part - Specific garment part to focus on
+       * @returns {string} Complete prompt for detail shot
+       */
+      static buildDetailPrompt(userText, part) {
+        return `Fashion detail photography, extreme close-up of ${part} of this outfit: ${userText}, white background, 4K`;
+      }
+
+      /**
+       * Get array of detail parts for generation
+       * Returns the six parts specified in Requirement 2.4
+       * @returns {string[]} Array of 6 detail part names
+       */
+      static getDetailParts() {
+        return [
+          'bodice front',
+          'bodice back',
+          'sleeve detail',
+          'skirt hem',
+          'dupatta',
+          'embroidery detail'
+        ];
+      }
+    }
+
+    // ============================================================================
+    // HUGGING FACE API CLIENT
+    // ============================================================================
+
+    /**
+     * HuggingFaceClient - Handles API communication with Hugging Face Inference API
+     * Implements Requirements 1.4, 1.5, 1.6, 1.7, 1.8, 11.5
+     */
+    class HuggingFaceClient {
+      /**
+       * Create a new HuggingFaceClient instance
+       * @param {string} apiKey - Hugging Face API key for authentication
+       */
+      constructor(apiKey) {
+        if (!apiKey || typeof apiKey !== 'string') {
+          throw new Error('Invalid API key: must be a non-empty string');
+        }
+        this.apiKey = apiKey;
+        this.endpoint = 'https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell';
+      }
+
+      /**
+       * Generate an image from a text prompt
+       * Makes POST request to Hugging Face API and returns image blob
+       * Implements Requirements 1.5, 1.6, 1.7, 1.8
+       * @param {string} prompt - Text prompt for image generation
+       * @returns {Promise<Blob>} Image blob from API response
+       * @throws {Error} On API errors (401, 429, 503) or network failures
+       */
+      async generateImage(prompt, width = 512, height = 512) {
+        if (!prompt || typeof prompt !== 'string') {
+          throw new Error('Invalid prompt: must be a non-empty string');
+        }
+
+        try {
+          // Build headers with Authorization Bearer token and Content-Type JSON
+          // Requirement 1.6: Authorization header with Bearer token format
+          const headers = this.buildHeaders();
+
+          // Send request body with "inputs" field containing prompt
+          // Requirement 1.7: JSON body with "inputs" field
+          const body = JSON.stringify({
+            inputs: prompt,
+            options: { wait_for_model: true }
+          });
+
+          // Make POST request to HF API
+          // Requirement 1.5: POST to https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell
+          const response = await fetch(this.endpoint, {
+            method: 'POST',
+            headers: headers,
+            body: body
+          });
+
+          if (!response.ok) {
+            let errorText = '';
+            try {
+              errorText = await response.text();
+            } catch (e) { }
+
+            console.error('Hugging Face API Error Response:', response.status, response.statusText, errorText);
+            alert(`Hugging Face API Error: ${response.status} ${response.statusText}\n${errorText}`);
+
+            throw await this.handleError(response);
+          }
+
+          // Return image blob from response
+          // Requirement 1.8: Convert binary image blobs to displayable format
+          const blob = await response.blob();
+          return blob;
+
+        } catch (error) {
+          console.error('Fetch Exception:', error);
+          // Handle network errors
+          if (error.name === 'TypeError' || error.message.includes('fetch')) {
+            alert(`Network Exception: ${error.message}`);
+            throw new Error('NETWORK_ERROR');
+          }
+          // Re-throw API errors
+          throw error;
+        }
+      }
+
+      /**
+       * Build HTTP headers for API request
+       * Implements Requirement 1.6: Authorization header with Bearer token
+       * @private
+       * @returns {Headers} Headers object with Authorization and Content-Type
+       */
+      buildHeaders() {
+        const headers = new Headers();
+        headers.append('Authorization', `Bearer ${this.apiKey}`);
+        headers.append('Content-Type', 'application/json');
+        return headers;
+      }
+
+      /**
+       * Handle API error responses and map to user-friendly error types
+       * Maps HTTP errors to specific error types for error handling
+       * @private
+       * @param {Response} response - Fetch API response object
+       * @returns {Promise<Error>} Error object with appropriate error type
+       */
+      async handleError(response) {
+        const status = response.status;
+
+        // 401 Unauthorized - Invalid API key
+        if (status === 401) {
+          return new Error('INVALID_TOKEN');
+        }
+
+        // 403 Forbidden - Insufficient permissions
+        if (status === 403) {
+          return new Error('PERMISSION_DENIED');
+        }
+
+        // 429 Too Many Requests - Rate limit exceeded
+        if (status === 429) {
+          return new Error('RATE_LIMIT');
+        }
+
+        // 503 Service Unavailable - Model loading
+        if (status === 503) {
+          // Check if it's model loading by examining response body
+          try {
+            const text = await response.text();
+            if (text.includes('loading') || text.includes('warming')) {
+              return new Error('MODEL_LOADING');
+            }
+          } catch (e) {
+            // If we can't read the response, assume generic 503
+          }
+          return new Error('MODEL_LOADING');
+        }
+
+        // Generic error for other status codes
+        return new Error(`API_ERROR: ${status}`);
+      }
+    }
+
+    // ============================================================================
+    // GENERATION ORCHESTRATOR
+    // ============================================================================
+
+    /**
+     * GenerationOrchestrator - Orchestrates the full 7-image generation sequence
+     * Implements Requirements 1.1, 1.2, 1.3, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.9, 7.10
+     */
+    class GenerationOrchestrator {
+      /**
+       * Create a new GenerationOrchestrator instance
+       * @param {HuggingFaceClient} apiClient - Configured HuggingFace API client
+       * @param {StateManager} stateManager - Application state manager
+       */
+      constructor(apiClient, stateManager) {
+        if (!apiClient || !(apiClient instanceof HuggingFaceClient)) {
+          throw new Error('Invalid apiClient: must be an instance of HuggingFaceClient');
+        }
+        if (!stateManager || !(stateManager instanceof StateManager)) {
+          throw new Error('Invalid stateManager: must be an instance of StateManager');
+        }
+        this.apiClient = apiClient;
+        this.stateManager = stateManager;
+      }
+
+      /**
+       * Generate complete design with 7 images (1 mannequin + 6 details)
+       * Updates state progressively as each image completes
+       * Implements Requirements 1.1, 1.2, 1.3, 7.2, 7.3, 7.4, 7.5, 7.6, 7.9, 7.10
+       * @param {string} userPrompt - User's exact outfit description
+       * @returns {Promise<void>}
+       */
+      async generateDesign(userPrompt) {
+        if (!userPrompt || typeof userPrompt !== 'string') {
+          throw new Error('Invalid userPrompt: must be a non-empty string');
+        }
+
+        try {
+          // Extract outfit metadata for display
+          const metadata = this.extractOutfitMetadata(userPrompt);
+
+          // Initialize generation state
+          const generationId = `gen_${Date.now()}`;
+          this.stateManager.updateGeneration({
+            id: generationId,
+            userPrompt: userPrompt,
+            outfitTitle: metadata.title,
+            progress: 0,
+            currentStep: 'Starting generation...',
+            mannequinImage: null,
+            detailImages: PromptBuilder.getDetailParts().map(part => ({
+              part: part,
+              imageUrl: null,
+              status: 'pending'
+            }))
+          });
+
+          // Add typing indicator message
+          const typingMessageId = `msg_${Date.now()}_typing`;
+          const typingMessage = {
+            id: typingMessageId,
+            type: 'ai',
+            content: '<div class="typing-indicator"><span></span><span></span><span></span></div>',
+            timestamp: Date.now()
+          };
+          this.stateManager.addMessage(typingMessage);
+
+          // Wait for 1.5s to simulate typing
+          await new Promise(resolve => setTimeout(resolve, 1500));
+
+          // Remove typing indicator by getting messages, filtering it out, and setting state
+          const state = this.stateManager.getState();
+          this.stateManager.setState({
+            messages: state.messages.filter(msg => msg.id !== typingMessageId)
+          });
+
+          // Add confirmation message (Requirement 7.2)
+          const confirmationMessage = {
+            id: `msg_${Date.now()}_confirm`,
+            type: 'ai',
+            content: `Got it! Generating your ${metadata.title.toLowerCase()}...`,
+            timestamp: Date.now()
+          };
+          this.stateManager.addMessage(confirmationMessage);
+
+          // Add AI message with design card
+          const designCardMessage = {
+            id: `msg_${Date.now()}_card`,
+            type: 'ai',
+            content: '',
+            timestamp: Date.now(),
+            designCard: {
+              outfitTitle: metadata.title,
+              occasion: metadata.occasion,
+              fabric: metadata.fabric,
+              progress: 0,
+              progressLabel: 'Generating mannequin view (1/7)...',
+              mannequinUrl: null,
+              detailImages: PromptBuilder.getDetailParts().map(part => ({
+                part: part,
+                imageUrl: null,
+                status: 'pending'
+              }))
+            }
+          };
+          this.stateManager.addMessage(designCardMessage);
+
+          // Generate mannequin view (Step 1/7)
+          const mannequinUrl = await this.generateMannequin(userPrompt, designCardMessage.id);
+
+          // Update design card with mannequin image
+          this.updateDesignCardInMessage(designCardMessage.id, {
+            mannequinUrl: mannequinUrl,
+            progress: 1,
+            progressLabel: 'Generating detail shots (1/7 complete)...'
+          });
+
+          // Generate detail shots (Steps 2-7/7)
+          const detailImages = await this.generateDetails(userPrompt, designCardMessage.id);
+
+          // Update design card with completion
+          this.updateDesignCardInMessage(designCardMessage.id, {
+            detailImages: detailImages,
+            progress: 7,
+            progressLabel: 'Complete!'
+          });
+
+          // Clear generation state
+          this.stateManager.clearGeneration();
+
+          // Add completion message with variation suggestions (Requirement 7.11)
+          const completionMessage = {
+            id: `msg_${Date.now()}_complete`,
+            type: 'ai',
+            content: 'Your design is ready! Want to try a variation?',
+            timestamp: Date.now()
+          };
+          this.stateManager.addMessage(completionMessage);
+
+        } catch (error) {
+          // Clear generation state on error
+          this.stateManager.clearGeneration();
+
+          // Add error message
+          const errorMessage = {
+            id: `msg_${Date.now()}_error`,
+            type: 'system',
+            content: this.getErrorMessage(error),
+            timestamp: Date.now()
+          };
+          this.stateManager.addMessage(errorMessage);
+
+          throw error;
+        }
+      }
+
+      /**
+       * Generate mannequin view image
+       * Implements Requirements 1.2, 2.2, 7.6
+       * @private
+       * @param {string} userPrompt - User's exact outfit description
+       * @param {string} messageId - ID of the message containing the design card
+       * @returns {Promise<string>} Object URL of the generated mannequin image
+       */
+      async generateMannequin(userPrompt, messageId) {
+        // Update progress
+        this.stateManager.updateGeneration({
+          progress: 0,
+          currentStep: 'Generating mannequin view (1/7)...'
+        });
+
+        // Build mannequin prompt using exact template
+        const prompt = PromptBuilder.buildMannequinPrompt(userPrompt);
+
+        // Generate image via API (Mannequin size: 768x1024)
+        const blob = await this.apiClient.generateImage(prompt, 768, 1024);
+
+        // Convert blob to object URL (Requirement 1.8)
+        const objectUrl = URL.createObjectURL(blob);
+
+        // Update generation state
+        this.stateManager.updateGeneration({
+          progress: 1,
+          currentStep: 'Mannequin view complete (1/7)',
+          mannequinImage: objectUrl
+        });
+
+        return objectUrl;
+      }
+
+      /**
+       * Generate 6 detail shot images sequentially
+       * Implements Requirements 1.3, 2.3, 2.4, 7.10
+       * @private
+       * @param {string} userPrompt - User's exact outfit description
+       * @param {string} messageId - ID of the message containing the design card
+       * @returns {Promise<Array>} Array of DetailImage objects with URLs
+       */
+      async generateDetails(userPrompt, messageId) {
+        const parts = PromptBuilder.getDetailParts();
+        const detailImages = [];
+
+        // Generate each detail shot sequentially (Steps 2-7)
+        for (let i = 0; i < parts.length; i++) {
+          const part = parts[i];
+          const stepNumber = i + 2; // Steps 2-7
+
+          // Update progress
+          this.stateManager.updateGeneration({
+            progress: stepNumber - 1,
+            currentStep: `Generating ${part} (${stepNumber}/7)...`
+          });
+
+          // Update design card progress
+          this.updateDesignCardInMessage(messageId, {
+            progress: stepNumber - 1,
+            progressLabel: `Generating ${part} (${stepNumber}/7)...`
+          });
+
+          // Build detail prompt using exact template
+          const prompt = PromptBuilder.buildDetailPrompt(userPrompt, part);
+
+          // Generate image via API (Detail size: 512x512)
+          const blob = await this.apiClient.generateImage(prompt, 512, 512);
+
+          // Convert blob to object URL
+          const objectUrl = URL.createObjectURL(blob);
+
+          // Create detail image object
+          const detailImage = {
+            part: part,
+            imageUrl: objectUrl,
+            status: 'complete'
+          };
+
+          detailImages.push(detailImage);
+
+          // Update generation state
+          this.stateManager.updateGeneration({
+            progress: stepNumber,
+            currentStep: `${part} complete (${stepNumber}/7)`
+          });
+
+          // Update design card with this detail image (progressive replacement)
+          this.updateDesignCardDetailImage(messageId, i, detailImage);
+        }
+
+        return detailImages;
+      }
+
+      /**
+       * Extract outfit metadata from user prompt for display
+       * Simple heuristic extraction for title, occasion, and fabric
+       * Implements Requirement 7.3
+       * @private
+       * @param {string} userPrompt - User's outfit description
+       * @returns {Object} Metadata object with title, occasion, fabric
+       */
+      extractOutfitMetadata(userPrompt) {
+        // Default values
+        let title = 'Custom Design';
+        let occasion = 'Casual';
+        let fabric = 'Mixed';
+
+        // Extract title - use first few words or garment type
+        const garmentTypes = ['lehenga', 'saree', 'anarkali', 'sharara', 'kurta', 'salwar', 'dupatta', 'gown'];
+        const lowerPrompt = userPrompt.toLowerCase();
+
+        for (const garment of garmentTypes) {
+          if (lowerPrompt.includes(garment)) {
+            // Capitalize first letter
+            title = garment.charAt(0).toUpperCase() + garment.slice(1);
+            break;
+          }
+        }
+
+        // Extract occasion keywords
+        const occasions = {
+          'bridal': 'Bridal',
+          'wedding': 'Wedding',
+          'party': 'Party',
+          'festive': 'Festive',
+          'casual': 'Casual',
+          'formal': 'Formal',
+          'traditional': 'Traditional'
+        };
+
+        for (const [keyword, occasionName] of Object.entries(occasions)) {
+          if (lowerPrompt.includes(keyword)) {
+            occasion = occasionName;
+            break;
+          }
+        }
+
+        // Extract fabric keywords
+        const fabrics = {
+          'silk': 'Silk',
+          'cotton': 'Cotton',
+          'chiffon': 'Chiffon',
+          'georgette': 'Georgette',
+          'velvet': 'Velvet',
+          'satin': 'Satin',
+          'brocade': 'Brocade',
+          'net': 'Net'
+        };
+
+        for (const [keyword, fabricName] of Object.entries(fabrics)) {
+          if (lowerPrompt.includes(keyword)) {
+            fabric = fabricName;
+            break;
+          }
+        }
+
+        return { title, occasion, fabric };
+      }
+
+      /**
+       * Update design card in a specific message
+       * @private
+       * @param {string} messageId - ID of the message containing the design card
+       * @param {Object} updates - Partial design card updates
+       */
+      updateDesignCardInMessage(messageId, updates) {
+        const state = this.stateManager.getState();
+        const messages = [...state.messages];
+        const messageIndex = messages.findIndex(msg => msg.id === messageId);
+
+        if (messageIndex !== -1 && messages[messageIndex].designCard) {
+          messages[messageIndex] = {
+            ...messages[messageIndex],
+            designCard: {
+              ...messages[messageIndex].designCard,
+              ...updates
+            }
+          };
+
+          this.stateManager.setState({ messages });
+        }
+      }
+
+      /**
+       * Update a specific detail image in the design card
+       * @private
+       * @param {string} messageId - ID of the message containing the design card
+       * @param {number} detailIndex - Index of the detail image to update
+       * @param {Object} detailImage - Updated detail image object
+       */
+      updateDesignCardDetailImage(messageId, detailIndex, detailImage) {
+        const state = this.stateManager.getState();
+        const messages = [...state.messages];
+        const messageIndex = messages.findIndex(msg => msg.id === messageId);
+
+        if (messageIndex !== -1 && messages[messageIndex].designCard) {
+          const detailImages = [...messages[messageIndex].designCard.detailImages];
+          detailImages[detailIndex] = detailImage;
+
+          messages[messageIndex] = {
+            ...messages[messageIndex],
+            designCard: {
+              ...messages[messageIndex].designCard,
+              detailImages: detailImages
+            }
+          };
+
+          this.stateManager.setState({ messages });
+        }
+      }
+
+      /**
+       * Get user-friendly error message from error object
+       * @private
+       * @param {Error} error - Error object
+       * @returns {string} User-friendly error message
+       */
+      getErrorMessage(error) {
+        const errorType = error.message;
+
+        switch (errorType) {
+          case 'NO_API_KEY':
+            return 'Please set your Hugging Face API key first. Click the ⚙️ settings icon in the top right to add it.';
+          case 'INVALID_TOKEN':
+            return 'Invalid API key. Please check your token in ⚙️ Settings';
+          case 'PERMISSION_DENIED':
+            return 'API token lacks permissions. Generate a new Fine-grained token with "Make calls to the serverless Inference API" checked in ⚙️ Settings.';
+          case 'RATE_LIMIT':
+            return 'Too many requests — please wait a moment and try again';
+          case 'MODEL_LOADING':
+            return 'Model is warming up, first image takes 20-30 seconds...';
+          case 'NETWORK_ERROR':
+            return 'Connection failed. Please check your internet and try again';
+          default:
+            return `An error occurred: ${errorType}`;
+        }
+      }
+    }
+
+    // ============================================================================
+    // APPLICATION INITIALIZATION
+    // ============================================================================
+
+    // Initialize state manager
+    const stateManager = new StateManager();
+
+    // Load API key from localStorage on startup
+    const savedAPIKey = StorageManager.getAPIKey();
+    if (savedAPIKey) {
+      stateManager.setAPIKey(savedAPIKey);
+    }
+
+    // ============================================================================
+    // UI COMPONENTS
+    // ============================================================================
+
+    /**
+     * Render the header component with brand name, status indicator, and settings button
+     * Implements Requirements 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7
+     * @param {boolean} apiKeyExists - Whether an API key is saved
+     * @returns {string} HTML string for the header
+     */
+    function renderHeader(apiKeyExists) {
+      const statusDotClass = apiKeyExists ? 'green' : 'red';
+      const statusText = apiKeyExists ? 'API Key Saved' : 'No API Key';
+      const showTooltip = !apiKeyExists;
+
+      return `
+        <div class="header-left">
+          <h1 class="brand-name">Vastra AI</h1>
+        </div>
+        <div class="header-right">
+          <div class="status-indicator" id="statusIndicator">
+            <div class="status-dot ${statusDotClass}"></div>
+            <span class="status-text">${statusText}</span>
+            ${showTooltip ? '<div class="tooltip">Set API Key to start</div>' : ''}
+          </div>
+          <button class="settings-button" id="settingsButton" aria-label="Open settings">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 1v6m0 6v6m5.196-15.804l-4.242 4.242m-5.908 5.908l-4.242 4.242M23 12h-6m-6 0H1m15.804-5.196l-4.242 4.242m-5.908 5.908l-4.242 4.242"></path>
+            </svg>
+          </button>
+        </div>
+      `;
+    }
+
+    /**
+     * Update the header in the DOM
+     */
+    function updateHeader() {
+      const state = stateManager.getState();
+      const apiKeyExists = !!state.apiKey;
+      const headerElement = document.querySelector('.header');
+
+      if (headerElement) {
+        headerElement.innerHTML = renderHeader(apiKeyExists);
+
+        // Attach event listeners
+        const statusIndicator = document.getElementById('statusIndicator');
+        const settingsButton = document.getElementById('settingsButton');
+
+        if (statusIndicator) {
+          statusIndicator.addEventListener('click', () => {
+            stateManager.openSettings();
+          });
+        }
+
+        if (settingsButton) {
+          settingsButton.addEventListener('click', () => {
+            stateManager.openSettings();
+          });
+        }
+      }
+    }
+
+    /**
+     * Mask API key to show only last 6 characters
+     * Implements Requirement 4.2
+     * @param {string} key - Full API key
+     * @returns {string} Masked key in format "hf_...xYz123"
+     */
+    function maskAPIKey(key) {
+      if (!key || key.length < 6) {
+        return '';
+      }
+      const lastSix = key.slice(-6);
+      return `hf_...${lastSix}`;
+    }
+
+    /**
+     * Render the settings drawer component
+     * Implements Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 12.1-12.7
+     * @param {boolean} isOpen - Whether the drawer is open
+     * @param {string|null} apiKey - Current API key or null
+     * @returns {string} HTML string for the settings drawer
+     */
+    function renderSettingsDrawer(isOpen, apiKey) {
+      const openClass = isOpen ? 'open' : '';
+      const displayValue = apiKey ? maskAPIKey(apiKey) : '';
+      const hasKey = !!apiKey;
+      const statusDotClass = hasKey ? 'green' : 'red';
+      const statusText = hasKey ? 'API Key Saved' : 'No API Key';
+
+      return `
+        <!-- Backdrop -->
+        <div class="settings-backdrop ${openClass}" id="settingsBackdrop"></div>
+        
+        <!-- Drawer -->
+        <div class="settings-drawer ${openClass}" id="settingsDrawer">
+          <!-- Header -->
+          <div class="settings-header">
+            <h2 class="settings-title">Settings</h2>
+            <button class="close-button" id="closeSettingsButton" aria-label="Close settings">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Content -->
+          <div class="settings-content">
+            <!-- API Key Section -->
+            <div class="settings-section">
+              <h3 class="section-title">Hugging Face API Key</h3>
+              <div class="api-key-input-wrapper">
+                <input 
+                  type="password" 
+                  class="api-key-input" 
+                  id="apiKeyInput" 
+                  placeholder="Enter your API key..."
+                  value="${displayValue}"
+                  autocomplete="off"
+                />
+                <p class="helper-text">
+                  Get your free API key at <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer">huggingface.co/settings/tokens</a>
+                </p>
+              </div>
+              <div class="button-group">
+                <button class="btn btn-primary" id="saveApiKeyButton">
+                  <span id="saveButtonText">Save</span>
+                </button>
+                <button class="btn btn-secondary" id="deleteApiKeyButton">Delete</button>
+              </div>
+            </div>
+            
+            <!-- API Status Indicator -->
+            <div class="settings-section">
+              <div class="status-indicator-section">
+                <div class="status-dot ${statusDotClass}"></div>
+                <span class="status-text">${statusText}</span>
+              </div>
+            </div>
+            
+            <!-- Model Info Section -->
+            <div class="settings-section">
+              <h3 class="section-title">Model Info</h3>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Model</span>
+                  <span class="info-value">FLUX.1-schnell</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Provider</span>
+                  <span class="info-value">Hugging Face</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Cost</span>
+                  <span class="info-value">Free — Unlimited</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Quality</span>
+                  <span class="info-value">High</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- How to Get API Key Section -->
+            <div class="settings-section">
+              <h3 class="section-title">How to Get API Key</h3>
+              <ol class="instructions-list">
+                <li class="instruction-item">
+                  <span class="instruction-number">1</span>
+                  <span class="instruction-text">
+                    Sign up at <a href="https://huggingface.co/join" target="_blank" rel="noopener noreferrer">huggingface.co</a>
+                  </span>
+                </li>
+                <li class="instruction-item">
+                  <span class="instruction-number">2</span>
+                  <span class="instruction-text">
+                    Navigate to Access Tokens in your account settings
+                  </span>
+                </li>
+                <li class="instruction-item">
+                  <span class="instruction-number">3</span>
+                  <span class="instruction-text">
+                    Create a new Fine-grained token with the <strong>"Make calls to the serverless Inference API"</strong> permission checked
+                  </span>
+                </li>
+                <li class="instruction-item">
+                  <span class="instruction-number">4</span>
+                  <span class="instruction-text">
+                    Copy and paste the token above
+                  </span>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * Update the settings drawer in the DOM
+     */
+    function updateSettingsDrawer() {
+      const state = stateManager.getState();
+      let drawerContainer = document.getElementById('settingsDrawerContainer');
+
+      // Create container if it doesn't exist
+      if (!drawerContainer) {
+        drawerContainer = document.createElement('div');
+        drawerContainer.id = 'settingsDrawerContainer';
+        document.body.appendChild(drawerContainer);
+      }
+
+      // Render drawer
+      drawerContainer.innerHTML = renderSettingsDrawer(state.settingsOpen, state.apiKey);
+
+      // Attach event listeners if drawer is open
+      if (state.settingsOpen) {
+        attachSettingsEventListeners();
+      }
+    }
+
+    /**
+     * Attach event listeners to settings drawer elements
+     */
+    function attachSettingsEventListeners() {
+      const backdrop = document.getElementById('settingsBackdrop');
+      const closeButton = document.getElementById('closeSettingsButton');
+      const saveButton = document.getElementById('saveApiKeyButton');
+      const deleteButton = document.getElementById('deleteApiKeyButton');
+      const apiKeyInput = document.getElementById('apiKeyInput');
+
+      // Close on backdrop click
+      if (backdrop) {
+        backdrop.addEventListener('click', () => {
+          stateManager.closeSettings();
+        });
+      }
+
+      // Close on close button click
+      if (closeButton) {
+        closeButton.addEventListener('click', () => {
+          stateManager.closeSettings();
+        });
+      }
+
+      // Close on Escape key
+      const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+          stateManager.closeSettings();
+          document.removeEventListener('keydown', handleEscape);
+        }
+      };
+      document.addEventListener('keydown', handleEscape);
+
+      // Save API key
+      if (saveButton && apiKeyInput) {
+        saveButton.addEventListener('click', () => {
+          const inputValue = apiKeyInput.value.trim();
+
+          // If showing masked value, don't save it again
+          if (inputValue && !inputValue.startsWith('hf_...')) {
+            // Save to localStorage
+            StorageManager.saveAPIKey(inputValue);
+
+            // Update state
+            stateManager.setAPIKey(inputValue);
+
+            // Show checkmark confirmation
+            const saveButtonText = document.getElementById('saveButtonText');
+            if (saveButtonText) {
+              const originalText = saveButtonText.innerHTML;
+              saveButtonText.innerHTML = `
+                <span class="checkmark-animation">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </span>
+                Saved
+              `;
+
+              // Reset after 2 seconds
+              setTimeout(() => {
+                saveButtonText.innerHTML = originalText;
+              }, 2000);
+            }
+          }
+        });
+      }
+
+      // Delete API key
+      if (deleteButton) {
+        deleteButton.addEventListener('click', () => {
+          // Remove from localStorage
+          StorageManager.deleteAPIKey();
+
+          // Update state
+          stateManager.clearAPIKey();
+
+          // Clear input field
+          if (apiKeyInput) {
+            apiKeyInput.value = '';
+          }
+        });
+      }
+    }
+
+    // ============================================================================
+    // CHAT INTERFACE COMPONENTS
+    // ============================================================================
+
+    /**
+     * Render the chat interface with welcome screen or message list
+     * Implements Requirements 6.1, 6.2
+     * @param {Array} messages - Array of message objects
+     * @returns {string} HTML string for the chat interface
+     */
+    function renderChatInterface(messages) {
+      // If no messages, show welcome screen
+      if (!messages || messages.length === 0) {
+        return renderWelcomeScreen();
+      }
+
+      // Otherwise, show message list
+      return renderMessageList(messages);
+    }
+
+    /**
+     * Render the welcome screen with greeting and suggestion chips
+     * Implements Requirement 6.2
+     * @returns {string} HTML string for the welcome screen
+     */
+    function renderWelcomeScreen() {
+      const suggestions = [
+        'Red silk lehenga with gold zari work',
+        'Pastel pink anarkali with floral embroidery',
+        'Royal blue saree with silver border',
+        'Emerald green sharara with mirror work',
+        'Ivory bridal lehenga with pearl details',
+        'Mustard yellow kurta with block print'
+      ];
+
+      const suggestionChipsHTML = suggestions
+        .map(suggestion => `
+          <button class="suggestion-chip" data-suggestion="${suggestion}">
+            ${suggestion}
+          </button>
+        `)
+        .join('');
+
+      return `
+        <div class="welcome-screen">
+          <h2 class="welcome-title">Welcome to Vastra AI</h2>
+          <p class="welcome-subtitle">
+            Describe your dream Indian outfit and watch it come to life with AI-powered fashion photography
+          </p>
+          <div class="suggestions-container">
+            ${suggestionChipsHTML}
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * Render the message list
+     * @param {Array} messages - Array of message objects
+     * @returns {string} HTML string for the message list
+     */
+    function renderMessageList(messages) {
+      const messagesHTML = messages
+        .map(message => renderMessage(message))
+        .join('');
+
+      return `
+        <div class="message-list">
+          ${messagesHTML}
+        </div>
+      `;
+    }
+
+    /**
+     * Render a single message bubble
+     * Implements Requirements 6.3, 6.4
+     * Enhanced to support design cards attached to AI messages
+     * @param {Object} message - Message object with id, type, content, timestamp, designCard (optional)
+     * @returns {string} HTML string for the message
+     */
+    function renderMessage(message) {
+      const messageClass = message.type; // 'user', 'ai', or 'system'
+
+      // Check if this AI message has an attached design card
+      const hasDesignCard = message.type === 'ai' && message.designCard;
+
+      return `
+        <div class="message ${messageClass}" data-message-id="${message.id}">
+          <div class="message-bubble">
+            ${message.content}
+          </div>
+          ${hasDesignCard ? renderDesignCard(message.designCard) : ''}
+        </div>
+      `;
+    }
+
+    /**
+     * Render a design card component with images and progress tracking
+     * Implements Requirements 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10
+     * @param {Object} card - Design card object with outfit details and images
+     * @returns {string} HTML string for the design card
+     */
+    function renderDesignCard(card) {
+      const progress = card.progress || 0; // 0-7
+      const progressPercent = (progress / 7) * 100;
+      const progressLabel = card.progressLabel || '';
+
+      return `
+        <div class="design-card">
+          <!-- Card Header -->
+          <div class="design-card-header">
+            <h3 class="outfit-title">${card.outfitTitle || 'Your Design'}</h3>
+            <div class="design-labels">
+              ${card.occasion ? `<span class="design-label">${card.occasion}</span>` : ''}
+              ${card.fabric ? `<span class="design-label">${card.fabric}</span>` : ''}
+            </div>
+          </div>
+          
+          <!-- Progress Bar -->
+          ${progress < 7 ? `
+            <div class="progress-section">
+              <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${progressPercent}%"></div>
+              </div>
+              <p class="progress-label">${progressLabel}</p>
+            </div>
+          ` : ''}
+          
+          <!-- Mannequin View -->
+          <div class="mannequin-section">
+            ${card.mannequinUrl ? `
+              <div class="image-container">
+                <img src="${card.mannequinUrl}" alt="Full mannequin view" class="mannequin-image" />
+                <div class="image-overlay">
+                  <button class="overlay-button view-button" data-image-url="${card.mannequinUrl}" data-label="Mannequin View" data-filename="${card.outfitTitle}-mannequin">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    View
+                  </button>
+                  <button class="overlay-button save-button" data-image-url="${card.mannequinUrl}" data-filename="${card.outfitTitle}-mannequin">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Save
+                  </button>
+                </div>
+              </div>
+              <p class="image-hint">Hover to view full size or download</p>
+            ` : `
+              <div class="skeleton-loader mannequin-skeleton"></div>
+            `}
+          </div>
+          
+          <!-- Detail Shots Grid -->
+          ${card.detailImages && card.detailImages.length > 0 ? `
+            <div class="detail-shots-section">
+              <div class="detail-grid">
+                ${card.detailImages.map(detail => `
+                  <div class="detail-item">
+                    ${detail.imageUrl ? `
+                      <div class="image-container detail-image-container">
+                        <img src="${detail.imageUrl}" alt="${detail.part}" class="detail-image" />
+                        <div class="image-overlay">
+                          <button class="overlay-button view-button" data-image-url="${detail.imageUrl}" data-label="${detail.part}" data-filename="${card.outfitTitle}-${detail.part.replace(/\s+/g, '-')}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                              <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                          </button>
+                          <button class="overlay-button save-button" data-image-url="${detail.imageUrl}" data-filename="${card.outfitTitle}-${detail.part.replace(/\s+/g, '-')}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                              <polyline points="7 10 12 15 17 10"></polyline>
+                              <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                          </button>
+                        </div>
+                        <p class="detail-label">${detail.part}</p>
+                      </div>
+                    ` : `
+                      <div class="skeleton-loader detail-skeleton"></div>
+                      <p class="detail-label">${detail.part}</p>
+                    `}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    /**
+     * Update the chat interface in the DOM
+     */
+    function updateChatInterface() {
+      const state = stateManager.getState();
+      const chatContainer = document.getElementById('chatContainer');
+
+      if (chatContainer) {
+        chatContainer.innerHTML = renderChatInterface(state.messages);
+
+        // Attach event listeners to suggestion chips if welcome screen is shown
+        if (state.messages.length === 0) {
+          attachSuggestionChipListeners();
+        }
+
+        // Attach event listeners to image overlay buttons
+        attachImageOverlayListeners();
+
+        // Auto-scroll to bottom
+        scrollToBottom();
+      }
+    }
+
+    /**
+     * Attach event listeners to image overlay buttons (View and Save)
+     * Implements Requirements 8.1, 8.2, 8.6
+     */
+    function attachImageOverlayListeners() {
+      // View buttons
+      const viewButtons = document.querySelectorAll('.view-button');
+      viewButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const imageUrl = button.getAttribute('data-image-url');
+          const label = button.getAttribute('data-label');
+          const filename = button.getAttribute('data-filename');
+
+          if (imageUrl && label && filename) {
+            stateManager.openLightbox({
+              imageUrl,
+              label,
+              filename
+            });
+          }
+        });
+      });
+
+      // Save buttons
+      const saveButtons = document.querySelectorAll('.save-button');
+      saveButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const imageUrl = button.getAttribute('data-image-url');
+          const filename = button.getAttribute('data-filename');
+
+          if (imageUrl && filename) {
+            downloadImage(imageUrl, filename);
+          }
+        });
+      });
+    }
+
+    /**
+     * Download an image as PNG file
+     * Implements Requirements 8.6, 8.7
+     * @param {string} imageUrl - URL of the image to download
+     * @param {string} filename - Filename for the download (without extension)
+     */
+    function downloadImage(imageUrl, filename) {
+      const link = document.createElement('a');
+      link.href = imageUrl;
+      link.download = `${filename}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    /**
+     * Render the lightbox component
+     * Implements Requirements 8.2, 8.3, 8.4, 8.5
+     * @param {Object|null} data - Lightbox data with imageUrl, label, filename
+     * @returns {string} HTML string for the lightbox
+     */
+    function renderLightbox(data) {
+      if (!data) {
+        return '';
+      }
+
+      return `
+        <div class="lightbox-overlay" id="lightboxOverlay">
+          <div class="lightbox-content">
+            <div class="lightbox-header">
+              <h3 class="lightbox-label">${data.label}</h3>
+              <button class="lightbox-close-button" id="lightboxCloseButton" aria-label="Close lightbox">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div class="lightbox-image-container">
+              <img src="${data.imageUrl}" alt="${data.label}" class="lightbox-image" />
+            </div>
+            <div class="lightbox-footer">
+              <button class="btn btn-primary" id="lightboxDownloadButton">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * Update the lightbox in the DOM
+     */
+    function updateLightbox() {
+      const state = stateManager.getState();
+      let lightboxContainer = document.getElementById('lightboxContainer');
+
+      // Create container if it doesn't exist
+      if (!lightboxContainer) {
+        lightboxContainer = document.createElement('div');
+        lightboxContainer.id = 'lightboxContainer';
+        document.body.appendChild(lightboxContainer);
+      }
+
+      // Render lightbox
+      lightboxContainer.innerHTML = renderLightbox(state.lightboxImage);
+
+      // Attach event listeners if lightbox is open
+      if (state.lightboxImage) {
+        attachLightboxEventListeners(state.lightboxImage);
+      }
+    }
+
+    /**
+     * Attach event listeners to lightbox elements
+     * @param {Object} data - Lightbox data with imageUrl, label, filename
+     */
+    function attachLightboxEventListeners(data) {
+      const overlay = document.getElementById('lightboxOverlay');
+      const closeButton = document.getElementById('lightboxCloseButton');
+      const downloadButton = document.getElementById('lightboxDownloadButton');
+
+      // Close on overlay click (but not on content click)
+      if (overlay) {
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) {
+            stateManager.closeLightbox();
+          }
+        });
+      }
+
+      // Close on close button click
+      if (closeButton) {
+        closeButton.addEventListener('click', () => {
+          stateManager.closeLightbox();
+        });
+      }
+
+      // Download on download button click
+      if (downloadButton) {
+        downloadButton.addEventListener('click', () => {
+          downloadImage(data.imageUrl, data.filename);
+        });
+      }
+
+      // Close on Escape key
+      const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+          stateManager.closeLightbox();
+          document.removeEventListener('keydown', handleEscape);
+        }
+      };
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    /**
+     * Attach event listeners to suggestion chips
+     */
+    function attachSuggestionChipListeners() {
+      const suggestionChips = document.querySelectorAll('.suggestion-chip');
+
+      suggestionChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          const suggestion = chip.getAttribute('data-suggestion');
+          const messageInput = document.getElementById('messageInput');
+
+          if (messageInput && suggestion) {
+            messageInput.value = suggestion;
+            messageInput.focus();
+          }
+        });
+      });
+    }
+
+    /**
+     * Scroll chat container to bottom
+     */
+    function scrollToBottom() {
+      const chatContainer = document.getElementById('chatContainer');
+      if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    }
+
+    /**
+     * Handle sending a message
+     * Clears input and resets textarea height after sending
+     * Implements Requirements 9.1, 9.2 (error handling for missing API key)
+     */
+    async function handleSendMessage() {
+      const messageInput = document.getElementById('messageInput');
+      const message = messageInput.value.trim();
+
+      if (!message) {
+        return;
+      }
+
+      // Check if API key exists (Requirement 9.1)
+      const state = stateManager.getState();
+      if (!state.apiKey) {
+        // Display error message (Requirement 9.1)
+        const errorMessage = {
+          id: `msg_${Date.now()}_error`,
+          type: 'system',
+          content: 'Please set your Hugging Face API key first. Click the ⚙️ settings icon in the top right to add it.',
+          timestamp: Date.now()
+        };
+        stateManager.addMessage(errorMessage);
+
+        // Auto-open settings drawer (Requirement 9.2)
+        stateManager.openSettings();
+        return;
+      }
+
+      // Create message object
+      const messageObj = {
+        id: `msg_${Date.now()}`,
+        type: 'user',
+        content: message,
+        timestamp: Date.now()
+      };
+
+      // Add message to state
+      stateManager.addMessage(messageObj);
+
+      // Clear input
+      messageInput.value = '';
+
+      // Reset textarea height to minimum (48px)
+      messageInput.style.height = '48px';
+
+      // Trigger image generation
+      try {
+        // Create API client with current API key
+        const apiClient = new HuggingFaceClient(state.apiKey);
+
+        // Create generation orchestrator
+        const orchestrator = new GenerationOrchestrator(apiClient, stateManager);
+
+        // Start generation
+        await orchestrator.generateDesign(message);
+
+      } catch (error) {
+        console.error('Generation error:', error);
+        // Error messages are handled by the orchestrator
+      }
+    }
+
+    /**
+     * Setup input bar event listeners
+     * Implements Requirements 6.5, 6.6, 6.7, 6.8
+     */
+    function setupInputBar() {
+      const messageInput = document.getElementById('messageInput');
+      const sendButton = document.getElementById('sendButton');
+
+      if (!messageInput || !sendButton) {
+        return;
+      }
+
+      // Auto-resize textarea (Requirement 6.8)
+      // Textarea should grow up to maximum 3 lines
+      messageInput.addEventListener('input', () => {
+        // Reset height to auto to get correct scrollHeight
+        messageInput.style.height = 'auto';
+
+        // Calculate new height with max 3 lines (48px min + 2 additional lines)
+        const maxHeight = 48 * 3; // 144px for 3 lines
+        const newHeight = Math.min(messageInput.scrollHeight, maxHeight);
+
+        messageInput.style.height = newHeight + 'px';
+      });
+
+      // Handle Enter key (send) and Shift+Enter (newline)
+      // Requirement 6.6: Enter key sends message
+      // Requirement 6.7: Shift+Enter inserts newline
+      messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSendMessage();
+        }
+        // Shift+Enter allows default behavior (newline)
+      });
+
+      // Handle send button click (Requirement 6.5)
+      sendButton.addEventListener('click', () => {
+        handleSendMessage();
+      });
+    }
+
+    // ============================================================================
+    // STATE SUBSCRIPTION AND RENDERING
+    // ============================================================================
+
+    /**
+     * Subscribe to state changes and update UI accordingly
+     */
+    stateManager.subscribe((state) => {
+      updateHeader();
+      updateSettingsDrawer();
+      updateChatInterface();
+      updateLightbox();
+    });
+
+    // Initial render
+    updateHeader();
+    updateSettingsDrawer();
+    updateChatInterface();
+    updateLightbox();
+
+    // Setup input bar
+    setupInputBar();
+
+    console.log('Vastra AI initialized with StateManager and StorageManager');
+  </script>
+</body>
+
+</html>

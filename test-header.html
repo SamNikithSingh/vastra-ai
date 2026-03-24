@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Header Component</title>
+  <style>
+    body {
+      font-family: 'DM Sans', sans-serif;
+      padding: 20px;
+      background-color: #faf6f1;
+    }
+    
+    .test-section {
+      margin-bottom: 40px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    h2 {
+      margin-bottom: 20px;
+      color: #1a1410;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background-color: #faf6f1;
+      border-bottom: 1px solid rgba(26, 20, 16, 0.1);
+      border-radius: 8px;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+    
+    .brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1a1410;
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      padding: 0.5rem 0.75rem;
+      border-radius: 1rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .status-indicator:hover {
+      background-color: rgba(26, 20, 16, 0.05);
+    }
+    
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .status-dot.green {
+      background-color: #4ade80;
+    }
+    
+    .status-dot.red {
+      background-color: #ef4444;
+      animation: pulse-red 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-red {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+      }
+    }
+    
+    .status-text {
+      font-size: 0.875rem;
+      color: #1a1410;
+    }
+    
+    .tooltip {
+      position: absolute;
+      bottom: -2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #1a1410;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 100;
+    }
+    
+    .tooltip::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-bottom: 4px solid #1a1410;
+    }
+    
+    .status-indicator:hover .tooltip {
+      opacity: 1;
+    }
+    
+    .settings-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      color: #1a1410;
+    }
+    
+    .settings-button:hover {
+      background-color: rgba(26, 20, 16, 0.1);
+      transform: rotate(45deg);
+    }
+    
+    .settings-button:active {
+      transform: rotate(45deg) scale(0.95);
+    }
+    
+    .test-result {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    
+    .test-result.pass {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    
+    .test-result.fail {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h1>Header Component Tests</h1>
+  
+  <div class="test-section">
+    <h2>Test 1: Header with API Key (Green Status)</h2>
+    <div class="header" id="header-with-key"></div>
+    <div class="test-result" id="result1"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Test 2: Header without API Key (Red Status with Tooltip)</h2>
+    <div class="header" id="header-without-key"></div>
+    <div class="test-result" id="result2"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Test 3: Click Handlers</h2>
+    <div class="header" id="header-interactive"></div>
+    <div class="test-result" id="result3"></div>
+    <p style="margin-top: 10px; color: #666;">Try clicking the status indicator and settings button above.</p>
+  </div>
+
+  <script>
+    // Copy the renderHeader function from index.html
+    function renderHeader(apiKeyExists) {
+      const statusDotClass = apiKeyExists ? 'green' : 'red';
+      const statusText = apiKeyExists ? 'API Key Saved' : 'No API Key';
+      const showTooltip = !apiKeyExists;
+      
+      return `
+        <div class="header-left">
+          <h1 class="brand-name">Vastra AI</h1>
+        </div>
+        <div class="header-right">
+          <div class="status-indicator" id="statusIndicator">
+            <div class="status-dot ${statusDotClass}"></div>
+            <span class="status-text">${statusText}</span>
+            ${showTooltip ? '<div class="tooltip">Set API Key to start</div>' : ''}
+          </div>
+          <button class="settings-button" id="settingsButton" aria-label="Open settings">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 1v6m0 6v6m5.196-15.804l-4.242 4.242m-5.908 5.908l-4.242 4.242M23 12h-6m-6 0H1m15.804-5.196l-4.242 4.242m-5.908 5.908l-4.242 4.242"></path>
+            </svg>
+          </button>
+        </div>
+      `;
+    }
+    
+    // Test 1: Header with API key
+    const header1 = document.getElementById('header-with-key');
+    header1.innerHTML = renderHeader(true);
+    
+    const hasGreenDot = header1.querySelector('.status-dot.green') !== null;
+    const hasCorrectText = header1.querySelector('.status-text').textContent === 'API Key Saved';
+    const hasNoTooltip = header1.querySelector('.tooltip') === null;
+    
+    const test1Pass = hasGreenDot && hasCorrectText && hasNoTooltip;
+    const result1 = document.getElementById('result1');
+    result1.className = `test-result ${test1Pass ? 'pass' : 'fail'}`;
+    result1.textContent = test1Pass 
+      ? '✓ PASS: Green dot, correct text, no tooltip' 
+      : '✗ FAIL: Expected green dot with "API Key Saved" and no tooltip';
+    
+    // Test 2: Header without API key
+    const header2 = document.getElementById('header-without-key');
+    header2.innerHTML = renderHeader(false);
+    
+    const hasRedDot = header2.querySelector('.status-dot.red') !== null;
+    const hasCorrectText2 = header2.querySelector('.status-text').textContent === 'No API Key';
+    const hasTooltip = header2.querySelector('.tooltip') !== null;
+    const tooltipText = hasTooltip ? header2.querySelector('.tooltip').textContent : '';
+    
+    const test2Pass = hasRedDot && hasCorrectText2 && hasTooltip && tooltipText === 'Set API Key to start';
+    const result2 = document.getElementById('result2');
+    result2.className = `test-result ${test2Pass ? 'pass' : 'fail'}`;
+    result2.textContent = test2Pass 
+      ? '✓ PASS: Red pulsing dot, correct text, tooltip present' 
+      : '✗ FAIL: Expected red dot with "No API Key" and tooltip';
+    
+    // Test 3: Click handlers
+    const header3 = document.getElementById('header-interactive');
+    header3.innerHTML = renderHeader(false);
+    
+    let statusClicked = false;
+    let settingsClicked = false;
+    
+    const statusIndicator = header3.querySelector('#statusIndicator');
+    const settingsButton = header3.querySelector('#settingsButton');
+    
+    statusIndicator.addEventListener('click', () => {
+      statusClicked = true;
+      updateTest3Result();
+    });
+    
+    settingsButton.addEventListener('click', () => {
+      settingsClicked = true;
+      updateTest3Result();
+    });
+    
+    function updateTest3Result() {
+      const result3 = document.getElementById('result3');
+      if (statusClicked && settingsClicked) {
+        result3.className = 'test-result pass';
+        result3.textContent = '✓ PASS: Both click handlers working';
+      } else if (statusClicked || settingsClicked) {
+        result3.className = 'test-result';
+        result3.textContent = `Status clicked: ${statusClicked}, Settings clicked: ${settingsClicked}`;
+      } else {
+        result3.className = 'test-result';
+        result3.textContent = 'Click the status indicator and settings button to test';
+      }
+    }
+    
+    updateTest3Result();
+    
+    console.log('Header component tests loaded');
+  </script>
+</body>
+</html>

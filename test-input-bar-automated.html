@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automated Input Bar Test</title>
+  <style>
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: #faf6f1;
+      padding: 2rem;
+      margin: 0;
+    }
+    
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      color: #1a1410;
+      margin-bottom: 1rem;
+    }
+    
+    .test-result {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+    
+    .test-result.pass {
+      background-color: #d1fae5;
+      color: #065f46;
+      border: 1px solid #10b981;
+    }
+    
+    .test-result.fail {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #ef4444;
+    }
+    
+    .test-result.pending {
+      background-color: #fef3c7;
+      color: #92400e;
+      border: 1px solid #f59e0b;
+    }
+    
+    .input-bar {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #faf6f1;
+      border-top: 1px solid rgba(26, 20, 16, 0.1);
+      padding: 1rem 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+      z-index: 5;
+      margin-top: 2rem;
+    }
+    
+    .input-textarea {
+      flex: 1;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(26, 20, 16, 0.2);
+      border-radius: 1.5rem;
+      background-color: white;
+      color: #1a1410;
+      resize: none;
+      min-height: 48px;
+      max-height: calc(48px * 3);
+      overflow-y: auto;
+      transition: all 0.2s ease;
+      line-height: 1.5;
+    }
+    
+    .send-button {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: #c9847a;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .summary {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background-color: #f3f4f6;
+      border-radius: 0.5rem;
+      font-weight: 600;
+    }
+    
+    .summary.pass {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    
+    .summary.fail {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>Automated Input Bar Tests</h1>
+    
+    <div id="test1" class="test-result pending">
+      <strong>Test 1: Auto-resize textarea</strong><br>
+      Status: Pending...
+    </div>
+    
+    <div id="test2" class="test-result pending">
+      <strong>Test 2: Enter key sends message</strong><br>
+      Status: Pending...
+    </div>
+    
+    <div id="test3" class="test-result pending">
+      <strong>Test 3: Shift+Enter adds newline</strong><br>
+      Status: Pending...
+    </div>
+    
+    <div id="test4" class="test-result pending">
+      <strong>Test 4: Send button works</strong><br>
+      Status: Pending...
+    </div>
+    
+    <div id="test5" class="test-result pending">
+      <strong>Test 5: Max 3 lines height limit</strong><br>
+      Status: Pending...
+    </div>
+    
+    <div id="summary" class="summary">
+      Running tests...
+    </div>
+    
+    <div class="input-bar">
+      <textarea 
+        class="input-textarea" 
+        id="messageInput" 
+        placeholder="Test textarea..."
+        rows="1"
+      ></textarea>
+      <button class="send-button" id="sendButton" aria-label="Send message">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    // Test results
+    const testResults = {
+      autoResize: false,
+      enterKey: false,
+      shiftEnter: false,
+      sendButton: false,
+      maxHeight: false
+    };
+    
+    let messagesSent = [];
+    
+    // Get elements
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    
+    // Setup input bar (same as main app)
+    function setupInputBar() {
+      if (!messageInput || !sendButton) {
+        return;
+      }
+      
+      // Auto-resize textarea
+      messageInput.addEventListener('input', () => {
+        messageInput.style.height = 'auto';
+        const maxHeight = 48 * 3; // 144px for 3 lines
+        const newHeight = Math.min(messageInput.scrollHeight, maxHeight);
+        messageInput.style.height = newHeight + 'px';
+      });
+      
+      // Handle Enter key (send) and Shift+Enter (newline)
+      messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSendMessage('Enter');
+        }
+      });
+      
+      // Handle send button click
+      sendButton.addEventListener('click', () => {
+        handleSendMessage('Button');
+      });
+    }
+    
+    function handleSendMessage(source) {
+      const message = messageInput.value.trim();
+      
+      if (!message) {
+        return;
+      }
+      
+      messagesSent.push({ message, source });
+      
+      // Clear input
+      messageInput.value = '';
+      
+      // Reset textarea height
+      messageInput.style.height = '48px';
+    }
+    
+    // Update test result
+    function updateTest(testId, pass, message) {
+      const element = document.getElementById(testId);
+      element.className = `test-result ${pass ? 'pass' : 'fail'}`;
+      element.innerHTML = `
+        <strong>${element.querySelector('strong').textContent}</strong><br>
+        ${pass ? '✓ PASS' : '✗ FAIL'}: ${message}
+      `;
+    }
+    
+    // Run automated tests
+    async function runTests() {
+      console.log('Starting automated tests...');
+      
+      // Test 1: Auto-resize
+      await new Promise(resolve => setTimeout(resolve, 500));
+      messageInput.value = 'Line 1';
+      messageInput.dispatchEvent(new Event('input'));
+      const height1 = parseInt(messageInput.style.height);
+      
+      messageInput.value = 'Line 1\nLine 2';
+      messageInput.dispatchEvent(new Event('input'));
+      const height2 = parseInt(messageInput.style.height);
+      
+      if (height2 > height1) {
+        testResults.autoResize = true;
+        updateTest('test1', true, `Textarea grew from ${height1}px to ${height2}px`);
+      } else {
+        updateTest('test1', false, `Textarea did not grow (${height1}px -> ${height2}px)`);
+      }
+      
+      // Test 2: Enter key
+      await new Promise(resolve => setTimeout(resolve, 500));
+      messageInput.value = 'Test message via Enter';
+      const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: false });
+      messageInput.dispatchEvent(enterEvent);
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      if (messagesSent.some(m => m.source === 'Enter')) {
+        testResults.enterKey = true;
+        updateTest('test2', true, 'Enter key triggered message send');
+      } else {
+        updateTest('test2', false, 'Enter key did not send message');
+      }
+      
+      // Test 3: Shift+Enter (should NOT send)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const beforeCount = messagesSent.length;
+      messageInput.value = 'Test with Shift+Enter';
+      const shiftEnterEvent = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: true });
+      messageInput.dispatchEvent(shiftEnterEvent);
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      if (messagesSent.length === beforeCount) {
+        testResults.shiftEnter = true;
+        updateTest('test3', true, 'Shift+Enter did not send message (correct)');
+      } else {
+        updateTest('test3', false, 'Shift+Enter incorrectly sent message');
+      }
+      
+      // Test 4: Send button
+      await new Promise(resolve => setTimeout(resolve, 500));
+      messageInput.value = 'Test message via button';
+      sendButton.click();
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      if (messagesSent.some(m => m.source === 'Button')) {
+        testResults.sendButton = true;
+        updateTest('test4', true, 'Send button triggered message send');
+      } else {
+        updateTest('test4', false, 'Send button did not send message');
+      }
+      
+      // Test 5: Max height (3 lines)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      messageInput.value = 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5';
+      messageInput.dispatchEvent(new Event('input'));
+      const finalHeight = parseInt(messageInput.style.height);
+      const maxHeight = 48 * 3; // 144px
+      
+      if (finalHeight <= maxHeight) {
+        testResults.maxHeight = true;
+        updateTest('test5', true, `Height capped at ${finalHeight}px (max: ${maxHeight}px)`);
+      } else {
+        updateTest('test5', false, `Height exceeded max: ${finalHeight}px > ${maxHeight}px`);
+      }
+      
+      // Summary
+      const allPassed = Object.values(testResults).every(r => r === true);
+      const passedCount = Object.values(testResults).filter(r => r === true).length;
+      const totalCount = Object.keys(testResults).length;
+      
+      const summaryEl = document.getElementById('summary');
+      summaryEl.className = `summary ${allPassed ? 'pass' : 'fail'}`;
+      summaryEl.innerHTML = `
+        <strong>Test Summary:</strong> ${passedCount}/${totalCount} tests passed<br>
+        ${allPassed ? '✓ All tests passed!' : '✗ Some tests failed'}
+      `;
+      
+      console.log('Tests completed:', testResults);
+      console.log('Messages sent:', messagesSent);
+    }
+    
+    // Initialize
+    setupInputBar();
+    
+    // Run tests after a short delay
+    setTimeout(runTests, 1000);
+  </script>
+</body>
+</html>

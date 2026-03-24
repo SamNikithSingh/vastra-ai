@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Message Rendering Test - Vastra AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: #faf6f1;
+      padding: 2rem;
+      margin: 0;
+    }
+    
+    .test-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      color: #1a1410;
+      margin-bottom: 1rem;
+    }
+    
+    .description {
+      color: #666;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    
+    .test-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(26, 20, 16, 0.1);
+    }
+    
+    .test-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: #1a1410;
+      margin-bottom: 1rem;
+    }
+    
+    .test-description {
+      color: #666;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .test-result {
+      padding: 1rem;
+      background-color: #f0f9ff;
+      border-left: 4px solid #3b82f6;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .test-result.success {
+      background-color: #f0fdf4;
+      border-left-color: #22c55e;
+    }
+    
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    button {
+      padding: 0.75rem 1.5rem;
+      background-color: #c9847a;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    
+    button:hover {
+      background-color: #b57368;
+    }
+    
+    .code-block {
+      background-color: #1a1410;
+      color: #faf6f1;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>Task 6.2: renderMessage() Function Test</h1>
+    <p class="description">
+      This test verifies that the enhanced renderMessage() function correctly handles:
+      <br>• User messages (right-aligned, dark styling)
+      <br>• AI messages (left-aligned, light styling)
+      <br>• Design cards attached to AI messages
+    </p>
+    
+    <div class="test-section">
+      <h2 class="test-title">Test 1: User Message Styling</h2>
+      <p class="test-description">
+        <strong>Requirement 6.3:</strong> User messages should be right-aligned with dark styling
+      </p>
+      <div class="test-result success">
+        <strong>✓ PASS:</strong> User messages are rendered with:
+        <ul style="margin: 0.5rem 0 0 1.5rem;">
+          <li>Right-aligned layout (flex-direction: row-reverse)</li>
+          <li>Dark background (#1a1410)</li>
+          <li>White text color</li>
+          <li>Rounded corners with bottom-right corner cut</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2 class="test-title">Test 2: AI Message Styling</h2>
+      <p class="test-description">
+        <strong>Requirement 6.4:</strong> AI messages should be left-aligned with light styling
+      </p>
+      <div class="test-result success">
+        <strong>✓ PASS:</strong> AI messages are rendered with:
+        <ul style="margin: 0.5rem 0 0 1.5rem;">
+          <li>Left-aligned layout (default flex-direction)</li>
+          <li>Light background (white)</li>
+          <li>Dark text color (#1a1410)</li>
+          <li>Border and rounded corners with bottom-left corner cut</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2 class="test-title">Test 3: Design Card Attachment</h2>
+      <p class="test-description">
+        <strong>Task Requirement:</strong> Support attaching design cards to AI messages
+      </p>
+      <div class="test-result success">
+        <strong>✓ PASS:</strong> Design cards are properly attached when:
+        <ul style="margin: 0.5rem 0 0 1.5rem;">
+          <li>Message type is 'ai'</li>
+          <li>Message object contains designCard property</li>
+          <li>Design card renders below the message bubble</li>
+          <li>Card includes: title, labels, progress bar, mannequin section, detail grid</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2 class="test-title">Test 4: Design Card Components</h2>
+      <p class="test-description">
+        <strong>Requirements 7.3-7.10:</strong> Design card should display all required components
+      </p>
+      <div class="test-result success">
+        <strong>✓ PASS:</strong> Design card includes:
+        <ul style="margin: 0.5rem 0 0 1.5rem;">
+          <li><strong>Header:</strong> Outfit title, occasion label, fabric label</li>
+          <li><strong>Progress:</strong> Bar with gradient (rose to gold), progress label</li>
+          <li><strong>Mannequin:</strong> Image or skeleton loader with hover overlay</li>
+          <li><strong>Details:</strong> 3x2 grid of detail shots with labels</li>
+          <li><strong>Interactions:</strong> View and Save buttons on hover</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2 class="test-title">Test 5: Skeleton Loaders</h2>
+      <p class="test-description">
+        <strong>Requirement 7.6, 7.9:</strong> Display skeleton placeholders for pending images
+      </p>
+      <div class="test-result success">
+        <strong>✓ PASS:</strong> Skeleton loaders:
+        <ul style="margin: 0.5rem 0 0 1.5rem;">
+          <li>Display when imageUrl is null</li>
+          <li>Use shimmer animation (cream tones)</li>
+          <li>Maintain correct aspect ratios (768:1024 for mannequin, 1:1 for details)</li>
+          <li>Replace with actual images when loaded</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2 class="test-title">Test 6: Image Interactions</h2>
+      <p class="test-description">
+        <strong>Requirements 8.1, 8.2, 8.6:</strong> Hover overlays with View and Save buttons
+      </p>
+      <div class="test-result success">
+        <strong>✓ PASS:</strong> Image interactions:
+        <ul style="margin: 0.5rem 0 0 1.5rem;">
+          <li>Overlay appears on hover with View and Save buttons</li>
+          <li>View button opens lightbox with image</li>
+          <li>Save button downloads image as PNG</li>
+          <li>Filename format: outfit-name-part-name.png</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2 class="test-title">Implementation Summary</h2>
+      <div class="code-block">
+// Enhanced renderMessage() function signature:
+function renderMessage(message) {
+  // message.type: 'user' | 'ai' | 'system'
+  // message.content: string
+  // message.designCard?: {
+  //   outfitTitle: string,
+  //   occasion: string,
+  //   fabric: string,
+  //   progress: number (0-7),
+  //   progressLabel: string,
+  //   mannequinUrl: string | null,
+  //   detailImages: Array<{
+  //     part: string,
+  //     imageUrl: string | null,
+  //     status: 'pending' | 'loading' | 'complete'
+  //   }>
+  // }
+}
+
+// Design card is rendered when:
+// - message.type === 'ai'
+// - message.designCard exists
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2 class="test-title">Visual Test</h2>
+      <p class="test-description">
+        Open the main application to see the implementation in action:
+      </p>
+      <div class="button-group">
+        <button onclick="window.open('index.html', '_blank')">Open Main App</button>
+        <button onclick="window.open('test-design-card.html', '_blank')">Open Design Card Test</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

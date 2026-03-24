@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StorageManager Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-result {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .pass {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .fail {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>StorageManager Test Suite</h1>
+  
+  <div class="test-section">
+    <h2>Manual Tests</h2>
+    <button onclick="runTests()">Run All Tests</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+    <div id="testResults"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Interactive Test</h2>
+    <input type="text" id="testKey" placeholder="Enter API key" style="padding: 8px; width: 300px;">
+    <button onclick="saveTestKey()">Save Key</button>
+    <button onclick="getTestKey()">Get Key</button>
+    <button onclick="deleteTestKey()">Delete Key</button>
+    <div id="interactiveResult"></div>
+  </div>
+
+  <script>
+    // StorageManager class (copied from index.html)
+    class StorageManager {
+      static saveAPIKey(key) {
+        if (!key || typeof key !== 'string') {
+          throw new Error('Invalid API key: must be a non-empty string');
+        }
+        localStorage.setItem('vastra_hf_key', key);
+      }
+      
+      static getAPIKey() {
+        return localStorage.getItem('vastra_hf_key');
+      }
+      
+      static deleteAPIKey() {
+        localStorage.removeItem('vastra_hf_key');
+      }
+    }
+
+    function displayResult(message, passed) {
+      const resultsDiv = document.getElementById('testResults');
+      const resultDiv = document.createElement('div');
+      resultDiv.className = `test-result ${passed ? 'pass' : 'fail'}`;
+      resultDiv.textContent = `${passed ? '✓' : '✗'} ${message}`;
+      resultsDiv.appendChild(resultDiv);
+    }
+
+    function clearStorage() {
+      localStorage.clear();
+      document.getElementById('testResults').innerHTML = '<div class="test-result pass">✓ Storage cleared</div>';
+      document.getElementById('interactiveResult').innerHTML = '';
+    }
+
+    function runTests() {
+      const resultsDiv = document.getElementById('testResults');
+      resultsDiv.innerHTML = '<h3>Running tests...</h3>';
+      
+      // Clear storage before tests
+      localStorage.clear();
+      
+      // Test 1: Save API key
+      try {
+        StorageManager.saveAPIKey('hf_test123456');
+        const saved = localStorage.getItem('vastra_hf_key');
+        displayResult('Test 1: saveAPIKey() stores key with correct name', saved === 'hf_test123456');
+      } catch (e) {
+        displayResult(`Test 1: saveAPIKey() failed - ${e.message}`, false);
+      }
+      
+      // Test 2: Get API key
+      try {
+        const retrieved = StorageManager.getAPIKey();
+        displayResult('Test 2: getAPIKey() retrieves stored key', retrieved === 'hf_test123456');
+      } catch (e) {
+        displayResult(`Test 2: getAPIKey() failed - ${e.message}`, false);
+      }
+      
+      // Test 3: Delete API key
+      try {
+        StorageManager.deleteAPIKey();
+        const afterDelete = StorageManager.getAPIKey();
+        displayResult('Test 3: deleteAPIKey() removes key', afterDelete === null);
+      } catch (e) {
+        displayResult(`Test 3: deleteAPIKey() failed - ${e.message}`, false);
+      }
+      
+      // Test 4: Get non-existent key returns null
+      try {
+        const nonExistent = StorageManager.getAPIKey();
+        displayResult('Test 4: getAPIKey() returns null when no key exists', nonExistent === null);
+      } catch (e) {
+        displayResult(`Test 4: getAPIKey() failed - ${e.message}`, false);
+      }
+      
+      // Test 5: Save empty string throws error
+      try {
+        StorageManager.saveAPIKey('');
+        displayResult('Test 5: saveAPIKey() rejects empty string', false);
+      } catch (e) {
+        displayResult('Test 5: saveAPIKey() rejects empty string', true);
+      }
+      
+      // Test 6: Save null throws error
+      try {
+        StorageManager.saveAPIKey(null);
+        displayResult('Test 6: saveAPIKey() rejects null', false);
+      } catch (e) {
+        displayResult('Test 6: saveAPIKey() rejects null', true);
+      }
+      
+      // Test 7: Verify storage key name is exactly "vastra_hf_key"
+      try {
+        StorageManager.saveAPIKey('hf_verify_key_name');
+        const keyExists = localStorage.getItem('vastra_hf_key') !== null;
+        const wrongKey = localStorage.getItem('vastra_api_key') !== null;
+        displayResult('Test 7: Uses correct storage key name "vastra_hf_key"', keyExists && !wrongKey);
+      } catch (e) {
+        displayResult(`Test 7: Storage key name verification failed - ${e.message}`, false);
+      }
+      
+      // Test 8: Multiple save/get cycles
+      try {
+        StorageManager.saveAPIKey('hf_first');
+        const first = StorageManager.getAPIKey();
+        StorageManager.saveAPIKey('hf_second');
+        const second = StorageManager.getAPIKey();
+        displayResult('Test 8: Multiple save operations work correctly', first === 'hf_first' && second === 'hf_second');
+      } catch (e) {
+        displayResult(`Test 8: Multiple operations failed - ${e.message}`, false);
+      }
+      
+      // Clean up
+      localStorage.clear();
+    }
+
+    // Interactive test functions
+    function saveTestKey() {
+      const key = document.getElementById('testKey').value;
+      const resultDiv = document.getElementById('interactiveResult');
+      try {
+        StorageManager.saveAPIKey(key);
+        resultDiv.innerHTML = '<div class="test-result pass">✓ Key saved successfully</div>';
+      } catch (e) {
+        resultDiv.innerHTML = `<div class="test-result fail">✗ Error: ${e.message}</div>`;
+      }
+    }
+
+    function getTestKey() {
+      const resultDiv = document.getElementById('interactiveResult');
+      try {
+        const key = StorageManager.getAPIKey();
+        if (key) {
+          resultDiv.innerHTML = `<div class="test-result pass">✓ Retrieved key: ${key}</div>`;
+        } else {
+          resultDiv.innerHTML = '<div class="test-result fail">✗ No key found in storage</div>';
+        }
+      } catch (e) {
+        resultDiv.innerHTML = `<div class="test-result fail">✗ Error: ${e.message}</div>`;
+      }
+    }
+
+    function deleteTestKey() {
+      const resultDiv = document.getElementById('interactiveResult');
+      try {
+        StorageManager.deleteAPIKey();
+        resultDiv.innerHTML = '<div class="test-result pass">✓ Key deleted successfully</div>';
+      } catch (e) {
+        resultDiv.innerHTML = `<div class="test-result fail">✗ Error: ${e.message}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HuggingFaceClient Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: #f5f5f5;
+    }
+    
+    .test-section {
+      background: white;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+    
+    h2 {
+      color: #555;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    
+    .test-result {
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    
+    .test-result.pass {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .test-result.fail {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .test-result.info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-right: 0.5rem;
+    }
+    
+    button:hover {
+      background-color: #0056b3;
+    }
+    
+    button:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    
+    .image-preview {
+      margin-top: 1rem;
+      max-width: 100%;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <h1>HuggingFaceClient Test Suite</h1>
+  
+  <div class="test-section">
+    <h2>Test 1: Constructor Validation</h2>
+    <button onclick="testConstructor()">Run Test</button>
+    <div id="test1-result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Test 2: Build Headers</h2>
+    <button onclick="testBuildHeaders()">Run Test</button>
+    <div id="test2-result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Test 3: Error Handling</h2>
+    <button onclick="testErrorHandling()">Run Test</button>
+    <div id="test3-result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Test 4: Generate Image (Manual - Requires API Key)</h2>
+    <input type="password" id="apiKeyInput" placeholder="Enter your Hugging Face API key..." />
+    <button onclick="testGenerateImage()">Generate Test Image</button>
+    <div id="test4-result"></div>
+  </div>
+  
+  <script>
+    // Copy the HuggingFaceClient class from index.html
+    class HuggingFaceClient {
+      constructor(apiKey) {
+        if (!apiKey || typeof apiKey !== 'string') {
+          throw new Error('Invalid API key: must be a non-empty string');
+        }
+        this.apiKey = apiKey;
+        this.endpoint = 'https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell';
+      }
+      
+      async generateImage(prompt) {
+        if (!prompt || typeof prompt !== 'string') {
+          throw new Error('Invalid prompt: must be a non-empty string');
+        }
+        
+        try {
+          const headers = this.buildHeaders();
+          const body = JSON.stringify({
+            inputs: prompt,
+            options: { wait_for_model: true }
+          });
+          
+          const response = await fetch(this.endpoint, {
+            method: 'POST',
+            headers: headers,
+            body: body
+          });
+          
+          if (!response.ok) {
+            let errorText = '';
+            try { errorText = await response.text(); } catch (e) {}
+            console.error('Hugging Face API Error Response:', response.status, response.statusText, errorText);
+            alert(`Hugging Face API Error: ${response.status} ${response.statusText}\n${errorText}`);
+            throw await this.handleError(response);
+          }
+          
+          const blob = await response.blob();
+          return blob;
+          
+        } catch (error) {
+          console.error('Fetch Exception:', error);
+          if (error.name === 'TypeError' || error.message.includes('fetch')) {
+            alert(`Network Exception: ${error.message}`);
+            throw new Error('NETWORK_ERROR');
+          }
+          throw error;
+        }
+      }
+      
+      buildHeaders() {
+        const headers = new Headers();
+        headers.append('Authorization', `Bearer ${this.apiKey}`);
+        headers.append('Content-Type', 'application/json');
+        return headers;
+      }
+      
+      async handleError(response) {
+        const status = response.status;
+        
+        if (status === 401) {
+          return new Error('INVALID_TOKEN');
+        }
+        
+        if (status === 429) {
+          return new Error('RATE_LIMIT');
+        }
+        
+        if (status === 503) {
+          try {
+            const text = await response.text();
+            if (text.includes('loading') || text.includes('warming')) {
+              return new Error('MODEL_LOADING');
+            }
+          } catch (e) {
+            // If we can't read the response, assume generic 503
+          }
+          return new Error('MODEL_LOADING');
+        }
+        
+        return new Error(`API_ERROR: ${status}`);
+      }
+    }
+    
+    // Test Functions
+    
+    function testConstructor() {
+      const resultDiv = document.getElementById('test1-result');
+      let results = [];
+      
+      try {
+        // Test 1: Valid API key
+        const client1 = new HuggingFaceClient('hf_test123');
+        results.push('✓ Valid API key accepted');
+        results.push(`✓ Endpoint set correctly: ${client1.endpoint}`);
+        
+        // Test 2: Empty string should throw
+        try {
+          new HuggingFaceClient('');
+          results.push('✗ Empty string should throw error');
+        } catch (e) {
+          results.push('✓ Empty string rejected');
+        }
+        
+        // Test 3: Null should throw
+        try {
+          new HuggingFaceClient(null);
+          results.push('✗ Null should throw error');
+        } catch (e) {
+          results.push('✓ Null rejected');
+        }
+        
+        // Test 4: Non-string should throw
+        try {
+          new HuggingFaceClient(123);
+          results.push('✗ Non-string should throw error');
+        } catch (e) {
+          results.push('✓ Non-string rejected');
+        }
+        
+        resultDiv.innerHTML = `<div class="test-result pass">${results.join('<br>')}</div>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="test-result fail">Test failed: ${error.message}</div>`;
+      }
+    }
+    
+    function testBuildHeaders() {
+      const resultDiv = document.getElementById('test2-result');
+      let results = [];
+      
+      try {
+        const client = new HuggingFaceClient('hf_test123');
+        const headers = client.buildHeaders();
+        
+        // Check Authorization header
+        const authHeader = headers.get('Authorization');
+        if (authHeader === 'Bearer hf_test123') {
+          results.push('✓ Authorization header correct: Bearer hf_test123');
+        } else {
+          results.push(`✗ Authorization header incorrect: ${authHeader}`);
+        }
+        
+        // Check Content-Type header
+        const contentType = headers.get('Content-Type');
+        if (contentType === 'application/json') {
+          results.push('✓ Content-Type header correct: application/json');
+        } else {
+          results.push(`✗ Content-Type header incorrect: ${contentType}`);
+        }
+        
+        resultDiv.innerHTML = `<div class="test-result pass">${results.join('<br>')}</div>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="test-result fail">Test failed: ${error.message}</div>`;
+      }
+    }
+    
+    async function testErrorHandling() {
+      const resultDiv = document.getElementById('test3-result');
+      let results = [];
+      
+      try {
+        const client = new HuggingFaceClient('hf_test123');
+        
+        // Test 401 error
+        const response401 = new Response(null, { status: 401 });
+        const error401 = await client.handleError(response401);
+        if (error401.message === 'INVALID_TOKEN') {
+          results.push('✓ 401 error mapped to INVALID_TOKEN');
+        } else {
+          results.push(`✗ 401 error incorrect: ${error401.message}`);
+        }
+        
+        // Test 429 error
+        const response429 = new Response(null, { status: 429 });
+        const error429 = await client.handleError(response429);
+        if (error429.message === 'RATE_LIMIT') {
+          results.push('✓ 429 error mapped to RATE_LIMIT');
+        } else {
+          results.push(`✗ 429 error incorrect: ${error429.message}`);
+        }
+        
+        // Test 503 error
+        const response503 = new Response('Model is loading', { status: 503 });
+        const error503 = await client.handleError(response503);
+        if (error503.message === 'MODEL_LOADING') {
+          results.push('✓ 503 error mapped to MODEL_LOADING');
+        } else {
+          results.push(`✗ 503 error incorrect: ${error503.message}`);
+        }
+        
+        resultDiv.innerHTML = `<div class="test-result pass">${results.join('<br>')}</div>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="test-result fail">Test failed: ${error.message}</div>`;
+      }
+    }
+    
+    async function testGenerateImage() {
+      const resultDiv = document.getElementById('test4-result');
+      const apiKey = document.getElementById('apiKeyInput').value.trim();
+      
+      if (!apiKey) {
+        resultDiv.innerHTML = '<div class="test-result fail">Please enter an API key</div>';
+        return;
+      }
+      
+      resultDiv.innerHTML = '<div class="test-result info">Generating image... This may take 20-30 seconds for first request.</div>';
+      
+      try {
+        const client = new HuggingFaceClient(apiKey);
+        const prompt = 'Professional Indian fashion photography, full length female mannequin, white studio background, soft studio lighting, fashion editorial style, full body front facing, 4K, Red silk lehenga with gold zari work';
+        
+        const blob = await client.generateImage(prompt);
+        
+        // Convert blob to object URL for display
+        const imageUrl = URL.createObjectURL(blob);
+        
+        resultDiv.innerHTML = `
+          <div class="test-result pass">
+            ✓ Image generated successfully!<br>
+            Blob size: ${blob.size} bytes<br>
+            Blob type: ${blob.type}<br>
+            <img src="${imageUrl}" alt="Generated image" class="image-preview" />
+          </div>
+        `;
+      } catch (error) {
+        let errorMessage = error.message;
+        let errorClass = 'fail';
+        
+        if (errorMessage === 'INVALID_TOKEN') {
+          errorMessage = 'Invalid API key. Please check your token.';
+        } else if (errorMessage === 'RATE_LIMIT') {
+          errorMessage = 'Rate limit exceeded. Please wait a moment and try again.';
+        } else if (errorMessage === 'MODEL_LOADING') {
+          errorMessage = 'Model is warming up. Please wait 20-30 seconds and try again.';
+          errorClass = 'info';
+        } else if (errorMessage === 'NETWORK_ERROR') {
+          errorMessage = 'Network error. Please check your internet connection.';
+        }
+        
+        resultDiv.innerHTML = `<div class="test-result ${errorClass}">Error: ${errorMessage}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>

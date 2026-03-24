@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Input Bar - Vastra AI</title>
+  <style>
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: #faf6f1;
+      padding: 2rem;
+      margin: 0;
+    }
+    
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      color: #1a1410;
+      margin-bottom: 1rem;
+    }
+    
+    .test-section {
+      margin-bottom: 2rem;
+    }
+    
+    .test-section h2 {
+      font-size: 1.125rem;
+      color: #1a1410;
+      margin-bottom: 0.5rem;
+    }
+    
+    .test-section p {
+      font-size: 0.875rem;
+      color: rgba(26, 20, 16, 0.7);
+      margin-bottom: 1rem;
+    }
+    
+    .input-bar {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #faf6f1;
+      border-top: 1px solid rgba(26, 20, 16, 0.1);
+      padding: 1rem 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+      z-index: 5;
+    }
+    
+    .input-textarea {
+      flex: 1;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(26, 20, 16, 0.2);
+      border-radius: 1.5rem;
+      background-color: white;
+      color: #1a1410;
+      resize: none;
+      min-height: 48px;
+      max-height: calc(48px * 3);
+      overflow-y: auto;
+      transition: all 0.2s ease;
+      line-height: 1.5;
+    }
+    
+    .input-textarea:focus {
+      outline: none;
+      border-color: #c9847a;
+    }
+    
+    .send-button {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: #c9847a;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    
+    .send-button:hover {
+      background-color: #b57368;
+      transform: scale(1.05);
+    }
+    
+    .send-button:active {
+      transform: scale(0.95);
+    }
+    
+    .message-log {
+      background-color: #faf6f1;
+      border: 1px solid rgba(26, 20, 16, 0.1);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      min-height: 200px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-size: 0.875rem;
+      color: #1a1410;
+    }
+    
+    .message-log-item {
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      background: white;
+      border-radius: 0.5rem;
+      border-left: 3px solid #c9847a;
+    }
+    
+    .message-log-item strong {
+      color: #c9847a;
+    }
+    
+    .test-result {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+    }
+    
+    .test-result.pass {
+      background-color: #d1fae5;
+      color: #065f46;
+      border: 1px solid #10b981;
+    }
+    
+    .test-result.fail {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #ef4444;
+    }
+    
+    .instructions {
+      background-color: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .instructions h3 {
+      margin-top: 0;
+      color: #92400e;
+      font-size: 1rem;
+    }
+    
+    .instructions ul {
+      margin: 0.5rem 0 0 1.5rem;
+      color: #92400e;
+    }
+    
+    .instructions li {
+      margin-bottom: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>Input Bar Component Test</h1>
+    
+    <div class="instructions">
+      <h3>Test Instructions:</h3>
+      <ul>
+        <li><strong>Auto-resize:</strong> Type multiple lines of text and verify the textarea grows up to 3 lines</li>
+        <li><strong>Enter key:</strong> Press Enter to send a message (should clear input and log message)</li>
+        <li><strong>Shift+Enter:</strong> Press Shift+Enter to add a new line (should NOT send)</li>
+        <li><strong>Send button:</strong> Click the send button to send a message</li>
+      </ul>
+    </div>
+    
+    <div class="test-section">
+      <h2>Test 1: Auto-resize Textarea</h2>
+      <p>Type text and observe the textarea growing up to 3 lines maximum.</p>
+      <div id="autoResizeTest"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>Test 2: Keyboard Shortcuts</h2>
+      <p>Test Enter (send) and Shift+Enter (newline) functionality.</p>
+      <div id="keyboardTest"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>Message Log</h2>
+      <div class="message-log" id="messageLog">
+        <em>Messages will appear here when sent...</em>
+      </div>
+    </div>
+    
+    <div class="input-bar">
+      <textarea 
+        class="input-textarea" 
+        id="messageInput" 
+        placeholder="Describe your outfit design..."
+        rows="1"
+      ></textarea>
+      <button class="send-button" id="sendButton" aria-label="Send message">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    // Test state
+    let messageCount = 0;
+    let testResults = {
+      autoResize: false,
+      enterKey: false,
+      shiftEnter: false,
+      sendButton: false
+    };
+    
+    // Get elements
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const messageLog = document.getElementById('messageLog');
+    
+    // Track initial height for auto-resize test
+    let initialHeight = 0;
+    let hasGrown = false;
+    
+    /**
+     * Auto-resize textarea implementation
+     * Implements Requirement 6.8
+     */
+    messageInput.addEventListener('input', () => {
+      // Store initial height on first input
+      if (initialHeight === 0) {
+        initialHeight = messageInput.scrollHeight;
+      }
+      
+      // Reset height to auto to get the correct scrollHeight
+      messageInput.style.height = 'auto';
+      
+      // Calculate new height (max 3 lines)
+      const lineHeight = 24; // Approximate line height in pixels
+      const maxHeight = 48 + (lineHeight * 2); // Min height + 2 additional lines = 3 lines total
+      const newHeight = Math.min(messageInput.scrollHeight, maxHeight);
+      
+      messageInput.style.height = newHeight + 'px';
+      
+      // Test auto-resize
+      if (messageInput.scrollHeight > initialHeight) {
+        hasGrown = true;
+        testResults.autoResize = true;
+        updateTestResult('autoResizeTest', 'Auto-resize working! Textarea expanded.', true);
+      }
+    });
+    
+    /**
+     * Handle Enter key (send) and Shift+Enter (newline)
+     * Implements Requirements 6.6, 6.7
+     */
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage('Enter key');
+        testResults.enterKey = true;
+        updateTestResult('keyboardTest', 'Enter key working! Message sent.', true);
+      } else if (e.key === 'Enter' && e.shiftKey) {
+        // Shift+Enter should allow newline (default behavior)
+        testResults.shiftEnter = true;
+        updateTestResult('keyboardTest', 'Shift+Enter working! Newline added.', true);
+      }
+    });
+    
+    /**
+     * Handle send button click
+     * Implements Requirement 6.5
+     */
+    sendButton.addEventListener('click', () => {
+      handleSendMessage('Send button');
+      testResults.sendButton = true;
+    });
+    
+    /**
+     * Handle sending a message
+     */
+    function handleSendMessage(source) {
+      const message = messageInput.value.trim();
+      
+      if (!message) {
+        return;
+      }
+      
+      messageCount++;
+      
+      // Log message
+      logMessage(message, source);
+      
+      // Clear input
+      messageInput.value = '';
+      
+      // Reset textarea height
+      messageInput.style.height = 'auto';
+      messageInput.style.height = '48px';
+      
+      // Focus back on input
+      messageInput.focus();
+    }
+    
+    /**
+     * Log a message to the message log
+     */
+    function logMessage(message, source) {
+      if (messageCount === 1) {
+        messageLog.innerHTML = '';
+      }
+      
+      const timestamp = new Date().toLocaleTimeString();
+      const messageItem = document.createElement('div');
+      messageItem.className = 'message-log-item';
+      messageItem.innerHTML = `
+        <strong>#${messageCount}</strong> [${timestamp}] via <em>${source}</em><br>
+        ${message.replace(/\n/g, '<br>')}
+      `;
+      
+      messageLog.appendChild(messageItem);
+      messageLog.scrollTop = messageLog.scrollHeight;
+    }
+    
+    /**
+     * Update test result display
+     */
+    function updateTestResult(elementId, message, pass) {
+      const element = document.getElementById(elementId);
+      const resultClass = pass ? 'pass' : 'fail';
+      
+      element.innerHTML = `
+        <div class="test-result ${resultClass}">
+          ${pass ? '✓' : '✗'} ${message}
+        </div>
+      `;
+    }
+    
+    // Initialize test results
+    updateTestResult('autoResizeTest', 'Waiting for input...', false);
+    updateTestResult('keyboardTest', 'Waiting for keyboard input...', false);
+    
+    console.log('Input bar test initialized');
+  </script>
+</body>
+</html>

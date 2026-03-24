@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkpoint 7: UI Components Verification</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: #faf6f1;
+      padding: 2rem;
+      margin: 0;
+    }
+    
+    .test-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      color: #1a1410;
+      margin-bottom: 1rem;
+    }
+    
+    .intro {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .test-section {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .test-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      color: #1a1410;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+    
+    .test-section h3 {
+      color: #c9847a;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 1.125rem;
+    }
+    
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .checklist li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(26, 20, 16, 0.1);
+    }
+    
+    .checklist li:last-child {
+      border-bottom: none;
+    }
+    
+    .checklist input[type="checkbox"] {
+      margin-right: 0.5rem;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .checklist label {
+      cursor: pointer;
+      font-size: 0.9375rem;
+    }
+    
+    .test-button {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background-color: #c9847a;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .test-button:hover {
+      background-color: #b57368;
+      transform: translateY(-2px);
+    }
+    
+    .test-button.secondary {
+      background-color: rgba(26, 20, 16, 0.1);
+      color: #1a1410;
+    }
+    
+    .test-button.secondary:hover {
+      background-color: rgba(26, 20, 16, 0.15);
+    }
+    
+    .iframe-container {
+      margin-top: 1rem;
+      border: 2px solid rgba(26, 20, 16, 0.1);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+      display: block;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .status-badge.pass {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status-badge.pending {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: rgba(26, 20, 16, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #c9847a, #c4a96b);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    
+    .instructions {
+      background-color: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .instructions h4 {
+      margin-top: 0;
+      color: #92400e;
+      font-size: 1rem;
+    }
+    
+    .instructions p {
+      margin: 0.5rem 0 0 0;
+      color: #92400e;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>🎯 Checkpoint 7: UI Components Verification</h1>
+    
+    <div class="intro">
+      <p><strong>Purpose:</strong> Verify that all UI components render correctly before moving to backend implementation.</p>
+      <p><strong>Status:</strong> <span class="status-badge pending" id="overallStatus">Testing in Progress</span></p>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <p id="progressText">0 of 4 components verified</p>
+    </div>
+    
+    <!-- Component 1: Header -->
+    <div class="test-section">
+      <h2>1. Header Component</h2>
+      <span class="status-badge pending" id="status1">Pending</span>
+      
+      <div class="instructions">
+        <h4>Testing Instructions:</h4>
+        <p>Open the application below and verify the header displays correctly with brand name, status indicator, and settings button.</p>
+      </div>
+      
+      <h3>Visual Checks</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="h1" data-section="1"><label for="h1">Brand name "Vastra AI" displays with Cormorant Garamond font</label></li>
+        <li><input type="checkbox" id="h2" data-section="1"><label for="h2">Status indicator dot is visible (red when no API key)</label></li>
+        <li><input type="checkbox" id="h3" data-section="1"><label for="h3">Settings gear icon is visible and rotates on hover</label></li>
+      </ul>
+      
+      <h3>Functional Checks</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="h4" data-section="1"><label for="h4">Red status dot pulses animation</label></li>
+        <li><input type="checkbox" id="h5" data-section="1"><label for="h5">Tooltip "Set API Key to start" appears on hover</label></li>
+        <li><input type="checkbox" id="h6" data-section="1"><label for="h6">Clicking status dot opens settings drawer</label></li>
+        <li><input type="checkbox" id="h7" data-section="1"><label for="h7">Clicking gear icon opens settings drawer</label></li>
+      </ul>
+    </div>
+    
+    <!-- Component 2: Settings Drawer -->
+    <div class="test-section">
+      <h2>2. Settings Drawer Component</h2>
+      <span class="status-badge pending" id="status2">Pending</span>
+      
+      <div class="instructions">
+        <h4>Testing Instructions:</h4>
+        <p>Click the gear icon or status indicator to open the settings drawer. Test all interactions.</p>
+      </div>
+      
+      <h3>Visual Checks</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="s1" data-section="2"><label for="s1">Drawer slides in from right with smooth animation</label></li>
+        <li><input type="checkbox" id="s2" data-section="2"><label for="s2">Dark backdrop appears behind drawer</label></li>
+        <li><input type="checkbox" id="s3" data-section="2"><label for="s3">Drawer is 360px wide on desktop (or full width on mobile)</label></li>
+        <li><input type="checkbox" id="s4" data-section="2"><label for="s4">All sections visible: API Key, Status, Model Info, Instructions</label></li>
+      </ul>
+      
+      <h3>Functional Checks - API Key Management</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="s5" data-section="2"><label for="s5">Can enter API key in password field</label></li>
+        <li><input type="checkbox" id="s6" data-section="2"><label for="s6">Clicking Save shows green checkmark for 2 seconds</label></li>
+        <li><input type="checkbox" id="s7" data-section="2"><label for="s7">Saved key is masked as "hf_...xYz123" (last 6 chars)</label></li>
+        <li><input type="checkbox" id="s8" data-section="2"><label for="s8">Status indicator updates to green "API Key Saved"</label></li>
+        <li><input type="checkbox" id="s9" data-section="2"><label for="s9">Clicking Delete removes key and clears input</label></li>
+        <li><input type="checkbox" id="s10" data-section="2"><label for="s10">Status indicator updates to red "No API Key"</label></li>
+      </ul>
+      
+      <h3>Functional Checks - Interactions</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="s11" data-section="2"><label for="s11">Clicking backdrop closes drawer</label></li>
+        <li><input type="checkbox" id="s12" data-section="2"><label for="s12">Clicking X button closes drawer</label></li>
+        <li><input type="checkbox" id="s13" data-section="2"><label for="s13">Pressing Escape key closes drawer</label></li>
+      </ul>
+    </div>
+    
+    <!-- Component 3: Chat Interface -->
+    <div class="test-section">
+      <h2>3. Chat Interface Component</h2>
+      <span class="status-badge pending" id="status3">Pending</span>
+      
+      <div class="instructions">
+        <h4>Testing Instructions:</h4>
+        <p>Verify the welcome screen displays correctly and messages appear properly after sending.</p>
+      </div>
+      
+      <h3>Welcome Screen Checks</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="c1" data-section="3"><label for="c1">Welcome title "Welcome to Vastra AI" displays</label></li>
+        <li><input type="checkbox" id="c2" data-section="3"><label for="c2">Welcome subtitle with description displays</label></li>
+        <li><input type="checkbox" id="c3" data-section="3"><label for="c3">6 suggestion chips are visible and clickable</label></li>
+        <li><input type="checkbox" id="c4" data-section="3"><label for="c4">Clicking suggestion chip populates input field</label></li>
+      </ul>
+      
+      <h3>Message Display Checks</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="c5" data-section="3"><label for="c5">User messages are right-aligned with dark background</label></li>
+        <li><input type="checkbox" id="c6" data-section="3"><label for="c6">Messages appear after sending (welcome screen disappears)</label></li>
+        <li><input type="checkbox" id="c7" data-section="3"><label for="c7">Messages animate in with slide effect</label></li>
+        <li><input type="checkbox" id="c8" data-section="3"><label for="c8">Chat auto-scrolls to bottom on new messages</label></li>
+      </ul>
+    </div>
+    
+    <!-- Component 4: Input Bar -->
+    <div class="test-section">
+      <h2>4. Input Bar Component</h2>
+      <span class="status-badge pending" id="status4">Pending</span>
+      
+      <div class="instructions">
+        <h4>Testing Instructions:</h4>
+        <p>Test the input bar functionality including auto-resize, keyboard shortcuts, and send button.</p>
+      </div>
+      
+      <h3>Visual Checks</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="i1" data-section="4"><label for="i1">Input bar is fixed at bottom of screen</label></li>
+        <li><input type="checkbox" id="i2" data-section="4"><label for="i2">Textarea has rounded corners and proper styling</label></li>
+        <li><input type="checkbox" id="i3" data-section="4"><label for="i3">Send button is circular with rose accent color</label></li>
+      </ul>
+      
+      <h3>Auto-resize Checks</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="i4" data-section="4"><label for="i4">Textarea starts at minimum height (1 line)</label></li>
+        <li><input type="checkbox" id="i5" data-section="4"><label for="i5">Textarea grows as you type multiple lines</label></li>
+        <li><input type="checkbox" id="i6" data-section="4"><label for="i6">Textarea caps at 3 lines maximum</label></li>
+        <li><input type="checkbox" id="i7" data-section="4"><label for="i7">Scrollbar appears after 3 lines</label></li>
+        <li><input type="checkbox" id="i8" data-section="4"><label for="i8">Height resets to minimum after sending</label></li>
+      </ul>
+      
+      <h3>Keyboard Shortcuts Checks</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="i9" data-section="4"><label for="i9">Pressing Enter sends message</label></li>
+        <li><input type="checkbox" id="i10" data-section="4"><label for="i10">Input clears after pressing Enter</label></li>
+        <li><input type="checkbox" id="i11" data-section="4"><label for="i11">Pressing Shift+Enter adds newline (does NOT send)</label></li>
+      </ul>
+      
+      <h3>Send Button Checks</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" id="i12" data-section="4"><label for="i12">Clicking send button sends message</label></li>
+        <li><input type="checkbox" id="i13" data-section="4"><label for="i13">Button has hover effect (scale and color)</label></li>
+        <li><input type="checkbox" id="i14" data-section="4"><label for="i14">Empty messages are not sent</label></li>
+      </ul>
+    </div>
+    
+    <!-- Live Application -->
+    <div class="test-section">
+      <h2>Live Application</h2>
+      <p>Use the application below to test all components:</p>
+      <div class="iframe-container">
+        <iframe src="index.html" id="appFrame"></iframe>
+      </div>
+      <div style="margin-top: 1rem;">
+        <button class="test-button" onclick="reloadApp()">🔄 Reload Application</button>
+        <a href="index.html" target="_blank" class="test-button secondary">🔗 Open in New Tab</a>
+      </div>
+    </div>
+    
+    <!-- Summary -->
+    <div class="test-section">
+      <h2>Summary</h2>
+      <p id="summaryText">Complete the checklists above to verify all components.</p>
+      <div style="margin-top: 1rem;">
+        <button class="test-button" onclick="markAllComplete()">✓ Mark All Complete</button>
+        <button class="test-button secondary" onclick="resetAll()">↺ Reset All</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Track completion status
+    const sections = {
+      1: { total: 7, checked: 0 },
+      2: { total: 13, checked: 0 },
+      3: { total: 8, checked: 0 },
+      4: { total: 14, checked: 0 }
+    };
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load saved state from localStorage
+      loadState();
+      
+      // Attach event listeners to all checkboxes
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', handleCheckboxChange);
+      });
+      
+      // Update initial state
+      updateProgress();
+    });
+    
+    function handleCheckboxChange(e) {
+      const section = e.target.dataset.section;
+      const isChecked = e.target.checked;
+      
+      if (isChecked) {
+        sections[section].checked++;
+      } else {
+        sections[section].checked--;
+      }
+      
+      updateProgress();
+      saveState();
+    }
+    
+    function updateProgress() {
+      // Update section statuses
+      for (let i = 1; i <= 4; i++) {
+        const section = sections[i];
+        const statusBadge = document.getElementById(`status${i}`);
+        
+        if (section.checked === section.total) {
+          statusBadge.textContent = 'Complete';
+          statusBadge.className = 'status-badge pass';
+        } else if (section.checked > 0) {
+          statusBadge.textContent = `${section.checked}/${section.total}`;
+          statusBadge.className = 'status-badge pending';
+        } else {
+          statusBadge.textContent = 'Pending';
+          statusBadge.className = 'status-badge pending';
+        }
+      }
+      
+      // Update overall progress
+      const totalChecked = Object.values(sections).reduce((sum, s) => sum + s.checked, 0);
+      const totalItems = Object.values(sections).reduce((sum, s) => sum + s.total, 0);
+      const completedSections = Object.values(sections).filter(s => s.checked === s.total).length;
+      
+      const progressPercent = (totalChecked / totalItems) * 100;
+      document.getElementById('progressFill').style.width = progressPercent + '%';
+      document.getElementById('progressText').textContent = `${completedSections} of 4 components verified (${totalChecked}/${totalItems} checks)`;
+      
+      // Update overall status
+      const overallStatus = document.getElementById('overallStatus');
+      if (completedSections === 4) {
+        overallStatus.textContent = 'All Components Verified ✓';
+        overallStatus.className = 'status-badge pass';
+        
+        document.getElementById('summaryText').innerHTML = `
+          <strong style="color: #065f46;">✓ Checkpoint Complete!</strong><br>
+          All UI components have been verified and are functioning correctly. 
+          The application is ready to proceed to backend implementation.
+        `;
+      } else {
+        overallStatus.textContent = 'Testing in Progress';
+        overallStatus.className = 'status-badge pending';
+      }
+    }
+    
+    function saveState() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      const state = {};
+      checkboxes.forEach(cb => {
+        state[cb.id] = cb.checked;
+      });
+      localStorage.setItem('checkpoint7_state', JSON.stringify(state));
+    }
+    
+    function loadState() {
+      const savedState = localStorage.getItem('checkpoint7_state');
+      if (savedState) {
+        const state = JSON.parse(savedState);
+        Object.keys(state).forEach(id => {
+          const checkbox = document.getElementById(id);
+          if (checkbox) {
+            checkbox.checked = state[id];
+            if (state[id]) {
+              const section = checkbox.dataset.section;
+              sections[section].checked++;
+            }
+          }
+        });
+      }
+    }
+    
+    function markAllComplete() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        if (!cb.checked) {
+          cb.checked = true;
+          const section = cb.dataset.section;
+          sections[section].checked++;
+        }
+      });
+      updateProgress();
+      saveState();
+    }
+    
+    function resetAll() {
+      if (confirm('Reset all checkboxes? This will clear your progress.')) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => {
+          cb.checked = false;
+        });
+        
+        // Reset section counts
+        for (let i = 1; i <= 4; i++) {
+          sections[i].checked = 0;
+        }
+        
+        updateProgress();
+        localStorage.removeItem('checkpoint7_state');
+      }
+    }
+    
+    function reloadApp() {
+      const iframe = document.getElementById('appFrame');
+      iframe.src = iframe.src;
+    }
+  </script>
+</body>
+</html>
