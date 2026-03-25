@@ -1346,13 +1346,13 @@
 
       /**
        * Build prompt for detail shot generation
-       * Uses exact template from Requirement 2.3 with part and user text
+       * Uses exact template to maintain tight visual consistency with the mannequin
        * @param {string} userText - User's exact outfit description
        * @param {string} part - Specific garment part to focus on
        * @returns {string} Complete prompt for detail shot
        */
       static buildDetailPrompt(userText, part) {
-        return `Fashion detail photography, extreme close-up of ${part} of this outfit: ${userText}, white background, 4K`;
+        return `Close-up of ${part} from the SAME outfit as the mannequin image, consistent design, same fabric, same embroidery, same color, highly detailed, studio lighting, matching the full outfit design exactly, ${userText}`;
       }
 
       /**
